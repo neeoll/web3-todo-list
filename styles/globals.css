@@ -1,16 +1,180 @@
-html,
+#blocker {
+  position:fixed;
+  padding:0;
+  margin:0;
+
+  top:0;
+  left:0;
+
+  width: 100%;
+  height: 100%;
+  background:rgba(255,255,255,0.2);
+  z-index: 1;
+}
+
 body {
-  padding: 0;
+  margin-top:20px;
+  background: #f8f8f8;
+}
+
+.todo-nav {
+  margin-top: 10px
+}
+
+.card-list {
+  margin: 10px 0
+}
+
+.card-list .card-item {
+  padding: 15px;
+  margin: 5px 0;
+  border-radius: 0;
+  background: #f7f7f7
+}
+
+div.checker {
+  width: 18px;
+  height: 18px
+}
+
+div.checker input,
+div.checker span {
+  width: 18px;
+  height: 18px
+}
+
+div.checker span {
+  display: -moz-inline-box;
+  display: inline-block;
+  zoom: 1;
+  text-align: center;
+  background-position: 0 -260px;
+}
+
+div.checker, div.checker input, div.checker span {
+  width: 19px;
+  height: 19px;
+}
+
+div.checker, div.radio, div.uploader {
+  position: relative;
+}
+
+div.button, div.button *, div.checker, div.checker *, div.radio, div.radio *, div.selector, div.selector *, div.uploader, div.uploader * {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  padding: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+div.button, div.checker, div.radio, div.selector, div.uploader {
+  display: -moz-inline-box;
+  display: inline-block;
+  zoom: 1;
+  vertical-align: middle;
 }
 
-* {
-  box-sizing: border-box;
+div.checker input:hover {
+  cursor: pointer;
+}
+
+div.card {
+  padding: 25px;
+  margin-bottom: 20px;
+  border: initial;
+  background: #fff;
+  border-radius: calc(.15rem - 1px);
+  box-shadow: 0 1px 15px rgba(0,0,0,0.04), 0 1px 6px rgba(0,0,0,0.04);
+}
+
+.list-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-link:hover {
+  cursor: pointer;
+}
+
+p.address {
+  color: #838383;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background: #292929;
+  }
+
+  h4 {
+    color: #fff;
+  }
+  
+  div#__next {
+    background: #292929;
+  }
+
+  div.container {
+    background: #292929;
+  }
+
+  .card-list .card-item {
+    color: #fff;
+    background: #292929;
+  }
+
+  div.card {
+    color: #fff;
+    padding: 25px;
+    margin: 20px;
+    border: initial;
+    background: #191919;
+    border-radius: calc(.15rem - 1px);
+    box-shadow: 0 1px 15px rgba(0,0,0,0.04), 0 1px 6px rgba(0,0,0,0.04);
+  }
+
+  input[type="text"]  {
+    background: #191919;
+    border-color: #292929;
+    border-width: 2.5px;
+    color: #fff;
+  }
+
+  input[type="text"]:focus-within  {
+    background: #191919;
+    border-color: #292929;
+    border-width: 2.5px;
+    color: #fff;
+  }
+
+  p.address {
+    color: #3b3b3b;
+  }
+}
+
+button.save {
+  background: #0075FF;
+  padding: 7.5px;
+  margin-top: 10px;
+  margin-right: 10px;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+button.save:hover {
+  background: #0062d2;
+}
+
+button.cancel {
+  background: #F71919;
+  padding: 7.5px;
+  margin-top: 10px;
+  margin-right: 10px;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+button.cancel:hover {
+  background: #c81414;
 }
