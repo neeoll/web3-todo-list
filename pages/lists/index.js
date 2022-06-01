@@ -26,14 +26,14 @@ export default function Lists() {
   function addRoute() { router.push(`add_list`) }
 
   return (
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-body">
-              <button class="save" onClick={createRoute}>Create New List</button> 
-              <button class="save" onClick={addRoute}>Add List By Address</button> 
-              <div class="card-list">
+    <div className="container">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-body">
+              <button className="save" onClick={createRoute}>Create New List</button> 
+              <button className="save" onClick={addRoute}>Add List By Address</button> 
+              <div className="card-list">
                 { lists.length == 0 ? <h4>It seems you don't have any lists, you should make one!</h4> : null }
                 { lists.map(item => (<List address={item} />)) }
               </div>

@@ -35,13 +35,13 @@ export default function CreateList() {
   }
 
   return (
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-body">
+    <div className="container">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-body">
               <form>
-                <input class="form-control add-task" onKeyDown={handleKeyPress} type="text" placeholder="Name" onChange={e => fillForm({...formData, name: e.target.value})} required/>
+                <input className="form-control add-task" onKeyDown={handleKeyPress} type="text" placeholder="Name" onChange={e => fillForm({...formData, name: e.target.value})} required/>
               </form>
             </div>
           </div>

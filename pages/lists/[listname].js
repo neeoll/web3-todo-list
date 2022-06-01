@@ -20,31 +20,30 @@ export default function Todo({ data }) {
   const [tasks, updateTasks] = useState([])
   const [permissions, updatePermissions] = useState({})
 
-  const initialContractLoad = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const contract = new ethers.Contract(listAddress, TodoList.abi, provider)
-    const contractData = await contract.getData()
-    const tasks = []
-
-    for (let i = 0; i < contractData[0].length; i++) {
-      const task = {
-        id: i,
-        content: contractData[0][i],
-        completed: contractData[1][i],
-        new: false,
-        changed: false
-      }
-      console.log(task)
-      tasks.push(task)
-    }
-    updateTasks(tasks)
-
-    const hasAccess = await contract.getWriteStatus({from: window.sessionStorage.getItem('userAddress')})
-    const isOwner = await contract.getOwnershipStatus({from: window.sessionStorage.getItem('userAddress')})
-    updatePermissions({...permissions, writeAccess: hasAccess, ownerStatus: isOwner})
-  }
-
   useEffect(() => {
+    const initialContractLoad = async () => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const contract = new ethers.Contract(listAddress, TodoList.abi, provider)
+      const contractData = await contract.getData()
+      const tasks = []
+  
+      for (let i = 0; i < contractData[0].length; i++) {
+        const task = {
+          id: i,
+          content: contractData[0][i],
+          completed: contractData[1][i],
+          new: false,
+          changed: false
+        }
+        console.log(task)
+        tasks.push(task)
+      }
+      updateTasks(tasks)
+  
+      const hasAccess = await contract.getWriteStatus({from: window.sessionStorage.getItem('userAddress')})
+      const isOwner = await contract.getOwnershipStatus({from: window.sessionStorage.getItem('userAddress')})
+      updatePermissions({...permissions, writeAccess: hasAccess, ownerStatus: isOwner})
+    }
     initialContractLoad()
   }, [])
 
@@ -139,37 +138,37 @@ export default function Todo({ data }) {
   }
 
   return (
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-body">
+    <div className="container">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-body">
               <form>
-                <input type="text" onKeyDown={handleKeyPress} class="form-control add-task" placeholder="New Task" name="taskName" onChange={e => updateForm({...formData, name: e.target.value})}/>
+                <input type="text" onKeyDown={handleKeyPress} className="form-control add-task" placeholder="New Task" name="taskName" onChange={e => updateForm({...formData, name: e.target.value})}/>
                 {
                   permissions.ownerStatus === true
-                  ? <input type="text" onKeyDown={handleKeyPress} class="form-control add-task" placeholder="Address to Grant Write Access" name="newAddress" onChange={e => updateForm({...formData, address: e.target.value})}/>
+                  ? <input type="text" onKeyDown={handleKeyPress} className="form-control add-task" placeholder="Address to Grant Write Access" name="newAddress" onChange={e => updateForm({...formData, address: e.target.value})}/>
                   : null
                 }
               </form>
-              {/* <ul class="nav nav-pills todo-nav">
-                <li role="presentation" class="nav-item all-task active"><a href="#" class="nav-link">All</a></li>
-                <li role="presentation" class="nav-item active-task"><a href="#" class="nav-link">Active</a></li>
-                <li role="presentation" class="nav-item completed-task"><a href="#" class="nav-link">Completed</a></li>
+              {/* <ul className="nav nav-pills todo-nav">
+                <li role="presentation" className="nav-item all-task active"><a href="#" className="nav-link">All</a></li>
+                <li role="presentation" className="nav-item active-task"><a href="#" className="nav-link">Active</a></li>
+                <li role="presentation" className="nav-item completed-task"><a href="#" className="nav-link">Completed</a></li>
               </ul> */}
-              <div class="card-list">
+              <div className="card-list">
                 {tasks.map(item => (
                   <Task id={item.id} contents={item.content} completed={item.completed} toggle={toggleCompletion}/>
                 ))}
               </div>
               {changesMade == true? 
                 <div>
-                  <button class="save" onClick={saveChanges}>Save Changes</button>
-                  <button class="cancel" onClick={cancelChanges}>Cancel</button>
+                  <button className="save" onClick={saveChanges}>Save Changes</button>
+                  <button className="cancel" onClick={cancelChanges}>Cancel</button>
                 </div>:
                 null
               }
-              <p class="address">Address: {listAddress}</p>
+              <p className="address">Address: {listAddress}</p>
               { permissions.writeAccess === false ? <div id="blocker" /> : null }
             </div>
           </div>

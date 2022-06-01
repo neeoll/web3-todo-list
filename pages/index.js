@@ -30,13 +30,13 @@ export default function Brackets() {
   }
 
   return (
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-body">
+    <div className="container">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="card">
+            <div className="card-body">
               <main>
-                <button class="save" onClick={connectWalletHandler}>{connButtonText}</button>
+                <button className="save" onClick={connectWalletHandler}>{connButtonText}</button>
                 {errorMessage}
               </main>
             </div>

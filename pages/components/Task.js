@@ -14,8 +14,8 @@ export default function Task(props) {
   }, [props])
 
   return(
-    <div class="card-item">
-      <div class="checker"><span class=""><input type="checkbox" onChange={toggle} checked={propsData.completed}/></span></div>
+    <div className="card-item">
+      <div className="checker"><span className=""><input type="checkbox" onChange={toggle} checked={propsData.completed}/></span></div>
       <span> {propsData.contents}</span>
     </div>
   )

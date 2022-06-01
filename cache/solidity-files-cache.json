@@ -39,8 +39,8 @@
       ]
     },
     "C:\\Users\\Noel\\Desktop\\web3-todo-list\\contracts\\TodoList.sol": {
-      "lastModificationDate": 1654008743133,
-      "contentHash": "4461166b64f30e00ba9add43d5fd94f4",
+      "lastModificationDate": 1654011796265,
+      "contentHash": "5ce04abc847c6bc9e50e61dadbe3fa1d",
       "sourceName": "contracts/TodoList.sol",
       "solcConfig": {
         "version": "0.8.9",
