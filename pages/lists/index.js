@@ -21,8 +21,8 @@ export default function Lists() {
     getLists()
   }, [])
 
-  function createRoute() { router.push(`create_list`) }
-  function addRoute() { router.push(`add_list`) }
+  function createRoute() { router.push('create_list') }
+  function addRoute() { router.push('add_list') }
 
   return (
     <div className="container">
@@ -33,7 +33,7 @@ export default function Lists() {
               <button className="save" onClick={createRoute}>Create New List</button> 
               <button className="save" onClick={addRoute}>Add List By Address</button> 
               <div className="card-list">
-                { lists.length == 0 ? <h4>It seems you don't have any lists, you should make one!</h4> : null }
+                { lists.length == 0 ? <h4>You currently have no lists, time to make one!</h4> : null }
                 { lists.map(item => (
                   <li key={item}>
                     <List address={item} />
