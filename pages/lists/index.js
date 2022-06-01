@@ -10,15 +10,14 @@ export default function Lists() {
   const [lists, updateLists] = useState([])
   const router = useRouter()
 
-  const getLists = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const contract = new ethers.Contract(contractAddress, Main.abi, provider)
-    const contractData = await contract.getLists({from: window.sessionStorage.getItem('userAddress')})
-    
-    updateLists(contractData)
-  }
-
   useEffect(() => {
+    const getLists = async () => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const contract = new ethers.Contract(contractAddress, Main.abi, provider)
+      const contractData = await contract.getLists({from: window.sessionStorage.getItem('userAddress')})
+      
+      updateLists(contractData)
+    }
     getLists()
   }, [])
 
@@ -35,7 +34,11 @@ export default function Lists() {
               <button className="save" onClick={addRoute}>Add List By Address</button> 
               <div className="card-list">
                 { lists.length == 0 ? <h4>It seems you don't have any lists, you should make one!</h4> : null }
-                { lists.map(item => (<List address={item} />)) }
+                { lists.map(item => (
+                  <li key={item}>
+                    <List address={item} />
+                  </li>
+                )) }
               </div>
             </div>
           </div>

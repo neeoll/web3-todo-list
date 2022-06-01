@@ -9,7 +9,7 @@ export default function List(props) {
   const [listData, setListData] = useState([])
   const router = useRouter()
 
-  useEffect(() => {
+  useEffect((props) => {
     const getData = async () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const contract = new ethers.Contract(props.address, TodoList.abi, provider)
@@ -55,7 +55,9 @@ export default function List(props) {
       <a className="nav-link" onClick={route}>{listTitle}</a>
       {
         listData.map(item => (
-          <p>{item.contents}</p>
+          <li key={item.id}>
+            <p>{item.contents}</p>
+          </li>
         ))
       }
     </div>

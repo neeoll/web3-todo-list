@@ -20,7 +20,7 @@ export default function Todo({ data }) {
   const [tasks, updateTasks] = useState([])
   const [permissions, updatePermissions] = useState({})
 
-  useEffect(() => {
+  useEffect((listAddress, permissions) => {
     const initialContractLoad = async () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const contract = new ethers.Contract(listAddress, TodoList.abi, provider)
@@ -158,7 +158,9 @@ export default function Todo({ data }) {
               </ul> */}
               <div className="card-list">
                 {tasks.map(item => (
-                  <Task id={item.id} contents={item.content} completed={item.completed} toggle={toggleCompletion}/>
+                  <li key={item.id}>
+                    <Task id={item.id} contents={item.content} completed={item.completed} toggle={toggleCompletion}/>
+                  </li>
                 ))}
               </div>
               {changesMade == true? 
