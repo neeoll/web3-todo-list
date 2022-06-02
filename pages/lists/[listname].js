@@ -20,8 +20,7 @@ export default function Todo({ data }) {
   const [tasks, updateTasks] = useState([])
   const [permissions, updatePermissions] = useState({})
 
-  useEffect((listAddress, permissions) => {
-    const initialContractLoad = async () => {
+  const initialContractLoad = async () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const contract = new ethers.Contract(listAddress, TodoList.abi, provider)
       const contractData = await contract.getData()
@@ -44,6 +43,8 @@ export default function Todo({ data }) {
       const isOwner = await contract.getOwnershipStatus({from: window.sessionStorage.getItem('userAddress')})
       updatePermissions({...permissions, writeAccess: hasAccess, ownerStatus: isOwner})
     }
+
+  useEffect(() => {
     initialContractLoad()
   }, [])
 

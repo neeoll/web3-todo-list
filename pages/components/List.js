@@ -9,36 +9,37 @@ export default function List(props) {
   const [listData, setListData] = useState([])
   const router = useRouter()
 
-  useEffect((props) => {
-    const getData = async () => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const contract = new ethers.Contract(props.address, TodoList.abi, provider)
-      const title = await contract.getTitle()
-      const data = await contract.getData()
-      const tasks = []
-  
-      for (let i = 0; i < data[0].length; i++) {
-        tasks.push({
-          id: i,
-          contents: data[0][i],
-          completed: data[1][i]
-        })
-      }
-  
-      if (tasks.length > 3) {
-        tasks = tasks.splice(1)
-        tasks.push({
-          id: 100, 
-          contents: '...',
-          completed: false
-        })
-      }
-  
-      tasks = tasks.filter(each => !each.completed)
-      
-      setTitle(title)
-      setListData(tasks)
+  const getData = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const contract = new ethers.Contract(props.address, TodoList.abi, provider)
+    const title = await contract.getTitle()
+    const data = await contract.getData()
+    const tasks = []
+
+    for (let i = 0; i < data[0].length; i++) {
+      tasks.push({
+        id: i,
+        contents: data[0][i],
+        completed: data[1][i]
+      })
     }
+
+    tasks = tasks.filter(each => !each.completed)
+
+    if (tasks.length > 3) {
+      tasks = tasks.splice(1)
+      tasks.push({
+        id: 100, 
+        contents: '...',
+        completed: false
+      })
+    }
+    
+    setTitle(title)
+    setListData(tasks)
+  }
+
+  useEffect(() => {
     getData()
   }, [])
 

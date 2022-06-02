@@ -15,8 +15,10 @@ export default function Lists() {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const contract = new ethers.Contract(contractAddress, Main.abi, provider)
       const contractData = await contract.getLists({from: window.sessionStorage.getItem('userAddress')})
-      
-      updateLists(contractData)
+
+      for (let i = 0; i < contractData.length; i++) {
+        updateLists([...lists, {id: i, address: contractData[i]}])
+      }
     }
     getLists()
   }, [])
@@ -35,8 +37,8 @@ export default function Lists() {
               <div className="card-list">
                 { lists.length == 0 ? <h4>You currently have no lists, time to make one!</h4> : null }
                 { lists.map(item => (
-                  <li key={item}>
-                    <List address={item} />
+                  <li key={item.id}>
+                    <List address={item.address} />
                   </li>
                 )) }
               </div>
