@@ -12,6 +12,11 @@
   z-index: 1;
 }
 
+.allow {
+  position: absolute;
+  z-index: 1;
+}
+
 body {
   margin-top:20px;
   background: #f8f8f8;

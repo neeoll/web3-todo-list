@@ -5,7 +5,7 @@ import './TodoList.sol';
 
 contract Main {
     event Create(address contractAddr);
-    event Add(address contractAddr);
+    event Add();
     event Remove();
 
     mapping(address => TodoList[]) lists;
@@ -21,7 +21,7 @@ contract Main {
         TodoList list = TodoList(listAddr);
         lists[msg.sender].push(list);
 
-        emit Add(address(list));
+        emit Add();
     }
 
     function removeList(address listAddr) public {

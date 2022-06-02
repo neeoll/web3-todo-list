@@ -11,7 +11,7 @@ export default function Task(props) {
 
   useEffect(() => {
     updateProps(props)
-  }, [props])
+  }, [])
 
   return(
     <div className="card-item">

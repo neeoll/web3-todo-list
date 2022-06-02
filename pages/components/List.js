@@ -26,7 +26,7 @@ export default function List(props) {
 
     tasks = tasks.filter(each => !each.completed)
 
-    if (tasks.length > 3) {
+    if (tasks.length > 2) {
       tasks = tasks.splice(1)
       tasks.push({
         id: 100, 

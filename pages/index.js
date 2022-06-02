@@ -1,17 +1,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 
-export default function Brackets() {
-
+export default function Home() {
   const router = useRouter()
-
   const [errorMessage, setErrorMessage] = useState()
   const [connButtonText, setConnButtonText] = useState('Connect Wallet')
 
-  const connectWalletHandler = () => {
+  const connectWalletHandler = async () => {
     if (typeof window.ethereum == 'undefined') {
-      console.log('Need to install MetaMask')
-      setErrorMessage('Please install MetaMask browser extension to interact')
+      setErrorMessage('Please install the MetaMask browser extension to interact')
       return
     }
 

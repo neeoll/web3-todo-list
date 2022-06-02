@@ -1,4 +1,3 @@
-import Head from 'next/head'
 import { useState } from 'react'
 import { ethers } from 'ethers'
 import { contractAddress } from '../config'
@@ -12,21 +11,17 @@ export default function CreateList() {
   async function contractCreate(e) {
     e.preventDefault()
     if (typeof window.ethereum == 'undefined') return
-    try {
-      const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner()
-      const contract = new ethers.Contract(contractAddress, Main.abi, signer)
-      await contract.createList(formData.name, {from: window.sessionStorage.getItem('userAddress')})
-      
-      contract.once('Create', async (contractAddr, event) => {
-        const slug = formData.name.replace(/\s/g, '-')
-        router.push({ 
-          pathname: `lists/${slug}`, 
-          query: { address: contractAddr }
-        }, `lists/${slug}`)
-      })
-    } catch (error) {
-      console.log(`error: ${error}`)
-    }
+    const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner()
+    const contract = new ethers.Contract(contractAddress, Main.abi, signer)
+    await contract.createList(formData.name, {from: window.sessionStorage.getItem('userAddress')})
+    
+    contract.once('Create', async (contractAddr, event) => {
+      const slug = formData.name.replace(/\s/g, '-')
+      router.push({ 
+        pathname: `lists/${slug}`, 
+        query: { address: contractAddr }
+      }, `lists/${slug}`)
+    })
   }
 
   function handleKeyPress(e) {
