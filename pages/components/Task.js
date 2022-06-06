@@ -4,11 +4,11 @@ export default function Task(props) {
 
   const [propsData, updateProps] = useState(props.data);
 
-  async function toggle() {
+  const toggle = () => {
     props.toggle(propsData.id)
   }
   
-  async function revert() {
+  const revert = () => {
     props.revert(propsData.id)
   }
 
@@ -26,5 +26,4 @@ export default function Task(props) {
       }
     </div>
   )
- 
 }

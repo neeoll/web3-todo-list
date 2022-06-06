@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
-import { useRouter } from 'next/router'
 
 export default function List(props) {
   
   const [listTitle, setTitle] = useState()
   const [listData, setListData] = useState([])
-  const router = useRouter()
 
   const getData = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -43,7 +41,7 @@ export default function List(props) {
     getData()
   }, [])
 
-  function route() {
+  const route = () => {
     props.route(listTitle, props.address)
   }
 

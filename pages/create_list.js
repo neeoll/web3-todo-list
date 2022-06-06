@@ -8,7 +8,7 @@ export default function CreateList() {
   const router = useRouter()
   const [formData, fillForm] = useState()
 
-  async function contractCreate(e) {
+  const contractCreate = async(e) => {
     e.preventDefault()
     if (typeof window.ethereum == 'undefined') return
     const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner()
@@ -24,7 +24,7 @@ export default function CreateList() {
     })
   }
 
-  function handleKeyPress(e) {
+  const handleKeyPress = (e) => {
     if (e.keyCode != 13) return
     contractCreate(e)
   }

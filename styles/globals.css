@@ -107,6 +107,10 @@ p.address {
   color: #838383;
 }
 
+.list-tab {
+  margin: 10px;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     background: #292929;

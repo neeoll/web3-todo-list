@@ -7,7 +7,7 @@ export default function AddList() {
   const router = useRouter()
   const [formData, fillForm] = useState()
 
-  async function routeToList(e) {
+  const routeToList = async(e) => {
     e.preventDefault()
     if (typeof window.ethereum == 'undefined') return
     const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -20,7 +20,7 @@ export default function AddList() {
     }, `lists/${slug}`)
   }
 
-  function handleKeyPress(e) {
+  const handleKeyPress = (e) => {
     if (e.keyCode != 13) return
     routeToList(e)
   }

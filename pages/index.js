@@ -6,7 +6,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState()
   const [connButtonText, setConnButtonText] = useState('Connect Wallet')
 
-  const connectWalletHandler = async () => {
+  const connectWalletHandler = async() => {
     if (typeof window.ethereum == 'undefined') {
       setErrorMessage('Please install the MetaMask browser extension to interact')
       return

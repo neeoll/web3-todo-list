@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
 import Task from '../components/Task'
+import { useRouter } from 'next/router'
 
 export function getServerSideProps(context) {
   return {
@@ -12,7 +13,6 @@ export function getServerSideProps(context) {
 }
 
 export default function Todo({ data }) {
-  
   const listAddress = data
   const userAddress = window.sessionStorage.getItem('userAddress')
   const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -25,6 +25,7 @@ export default function Todo({ data }) {
     return false
   }
 
+  const [currentTab, changeTab] = useState('all')
   const [formData, updateForm] = useState()
   const [tasks, updateTasks] = useState([])
   const [permissions, updatePermissions] = useState({})
@@ -46,16 +47,18 @@ export default function Todo({ data }) {
     }
     updateTasks(tasks)
 
+    const title = await contract.getTitle()
     const hasAccess = await contract.getWriteStatus({from: userAddress})
     const isOwner = await contract.getOwnershipStatus({from: userAddress})
     updatePermissions({...permissions, writeAccess: hasAccess, ownerStatus: isOwner})
+    setTitle(title)
   }
 
   useEffect(() => {
     initialContractLoad()
   }, [])
 
-  function handleKeyPress(e) {
+  const handleKeyPress = (e) => {
     if (e.keyCode == 13) { 
       if (document.activeElement.name == 'taskName') {
         addTask(e) 
@@ -66,7 +69,7 @@ export default function Todo({ data }) {
     }
   }
 
-  function addTask(e) {
+  const addTask = (e) => {
     e.preventDefault()
     updateTasks([...tasks, {
       id: tasks.length,
@@ -78,7 +81,7 @@ export default function Todo({ data }) {
     if (!changesMade) toggleChangesMade(true)
   }
 
-  async function modifyWriteAccess(e) {
+  const modifyWriteAccess = async(e) => {
     e.preventDefault()
     if (typeof window.ethereum == 'undefined') return
     const signer = provider.getSigner()
@@ -86,7 +89,7 @@ export default function Todo({ data }) {
     await contract.grantWriteAccess(formData.address, {from: userAddress})
   }
 
-  async function saveChanges() {
+  const saveChanges = async() => {
     if (typeof window.ethereum == 'undefined') return
     const changedIds = []
     const changedContents = []
@@ -109,7 +112,7 @@ export default function Todo({ data }) {
     })
   }
 
-  function cancelChanges() {
+  const cancelChanges = () => {
     const filteredTasks = tasks.filter(each => !each.new)
     filteredTasks.forEach((item) => {
       if (item.changed) {
@@ -143,7 +146,7 @@ export default function Todo({ data }) {
     toggleChangesMade(checkChanges(filteredTasks))
   }
 
-  async function addList() {
+  const addList = () => {
     if (typeof window.ethereum == 'undefined') return
     const signer = provider.getSigner()
     const contract = new ethers.Contract(contractAddress, Main.abi, signer)
@@ -181,9 +184,14 @@ export default function Todo({ data }) {
                   : null
                 }
               </form>
+              <ul className="nav nav-pills todo-nav">
+                <li className='list-tab'><a className='nav-link' onClick={() => changeTab('all')}>All</a></li>
+                <li className='list-tab'><a className='nav-link' onClick={() => changeTab('active')}>Active</a></li>
+                <li className='list-tab'><a className='nav-link' onClick={() => changeTab('completed')}>Completed</a></li>
+              </ul>
               <div className="card-list">
                 {tasks.map(item => (
-                  <li className="" key={item.id}>
+                  <li key={item.id}>
                     <Task data={item} toggle={toggleCompletion} revert={revertTask}/>
                   </li>
                 ))}
