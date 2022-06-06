@@ -31,19 +31,20 @@ ul {
 }
 
 .card-list {
-  margin: 10px 0
+  list-style: none;
+  
 }
 
 .card-list .card-item {
   padding: 15px;
-  margin: 5px 0;
+  margin: 5px 0px 5px 0px;
   border-radius: 0;
   background: #f7f7f7
 }
 
 div.checker {
   width: 18px;
-  height: 18px
+  height: 18px;
 }
 
 div.checker input,
@@ -72,6 +73,7 @@ div.checker, div.radio, div.uploader {
 div.button, div.button *, div.checker, div.checker *, div.radio, div.radio *, div.selector, div.selector *, div.uploader, div.uploader * {
   margin: 0;
   padding: 0;
+  margin-right: 10px;
 }
 
 div.button, div.checker, div.radio, div.selector, div.uploader {
@@ -109,6 +111,10 @@ p.address {
 
 .list-tab {
   margin: 10px;
+}
+
+.completed-content {
+  text-decoration: line-through;
 }
 
 @media (prefers-color-scheme: dark) {

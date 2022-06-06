@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export default function Task(props) {
 
@@ -12,14 +12,10 @@ export default function Task(props) {
     props.revert(propsData.id)
   }
 
-  useEffect(() => {
-    updateProps(props.data)
-  }, [])
-
   return(
     <div className="card-item">
       <div className="checker"><span className=""><input type="checkbox" onChange={toggle} checked={propsData.completed}/></span></div>
-      <span> {propsData.content}</span>
+      <span className={propsData.completed == true? "completed-content": null}>{propsData.content}</span>
       {propsData.changed === true?
         <button onClick={revert}>Revert</button>:
         null

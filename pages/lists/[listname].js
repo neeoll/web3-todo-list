@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { ethers } from 'ethers'
 import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
 import Task from '../components/Task'
-import { useRouter } from 'next/router'
 
 export function getServerSideProps(context) {
   return {
@@ -15,15 +14,7 @@ export function getServerSideProps(context) {
 export default function Todo({ data }) {
   const listAddress = data
   const userAddress = window.sessionStorage.getItem('userAddress')
-  const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const checkChanges = (list) => {
-    for (let i = 0; i < list.length; i++) {
-      if (list[i].changed == true) {
-        return true 
-      }
-    }
-    return false
-  }
+  const provider = useMemo(() => new ethers.providers.Web3Provider(window.ethereum), [])
 
   const [currentTab, changeTab] = useState('all')
   const [formData, updateForm] = useState()
@@ -31,32 +22,29 @@ export default function Todo({ data }) {
   const [permissions, updatePermissions] = useState({})
   const [changesMade, toggleChangesMade] = useState(false)
 
-  const initialContractLoad = async () => {
-    const contract = new ethers.Contract(listAddress, TodoList.abi, provider)
-    const contractData = await contract.getData()
-    const tasks = []
-
-    for (let i = 0; i < contractData[0].length; i++) {
-      tasks.push({
-        id: i,
-        content: contractData[0][i],
-        completed: contractData[1][i],
-        new: false,
-        changed: false
-      })
-    }
-    updateTasks(tasks)
-
-    const title = await contract.getTitle()
-    const hasAccess = await contract.getWriteStatus({from: userAddress})
-    const isOwner = await contract.getOwnershipStatus({from: userAddress})
-    updatePermissions({...permissions, writeAccess: hasAccess, ownerStatus: isOwner})
-    setTitle(title)
-  }
-
   useEffect(() => {
+    const initialContractLoad = async () => {
+      const contract = new ethers.Contract(listAddress, TodoList.abi, provider)
+      const contractData = await contract.getData()
+      const tasks = []
+  
+      for (let i = 0; i < contractData[0].length; i++) {
+        tasks.push({
+          id: i,
+          content: contractData[0][i],
+          completed: contractData[1][i],
+          new: false,
+          changed: false
+        })
+      }
+      updateTasks(tasks)
+
+      const hasAccess = await contract.getWriteStatus({from: userAddress})
+      const isOwner = await contract.getOwnershipStatus({from: userAddress})
+      updatePermissions({...permissions, writeAccess: hasAccess, ownerStatus: isOwner})
+    }
     initialContractLoad()
-  }, [])
+  }, [listAddress, permissions, provider, userAddress])
 
   const handleKeyPress = (e) => {
     if (e.keyCode == 13) { 
@@ -67,6 +55,15 @@ export default function Todo({ data }) {
       }
       document.activeElement.value = ''
     }
+  }
+
+  const checkChanges = (list) => {
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].changed == true) {
+        return true 
+      }
+    }
+    return false
   }
 
   const addTask = (e) => {
@@ -146,7 +143,7 @@ export default function Todo({ data }) {
     toggleChangesMade(checkChanges(filteredTasks))
   }
 
-  const addList = () => {
+  const addList = async() => {
     if (typeof window.ethereum == 'undefined') return
     const signer = provider.getSigner()
     const contract = new ethers.Contract(contractAddress, Main.abi, signer)
@@ -190,11 +187,24 @@ export default function Todo({ data }) {
                 <li className='list-tab'><a className='nav-link' onClick={() => changeTab('completed')}>Completed</a></li>
               </ul>
               <div className="card-list">
-                {tasks.map(item => (
-                  <li key={item.id}>
-                    <Task data={item} toggle={toggleCompletion} revert={revertTask}/>
-                  </li>
-                ))}
+                {currentTab == 'all'? 
+                  tasks.map(item => (
+                    <li key={item.id}>
+                      <Task data={item} toggle={toggleCompletion} revert={revertTask}/>
+                    </li>
+                  )): 
+                  currentTab == 'active'?
+                  tasks.filter(item => item.completed == false).map(item => (
+                    <li key={item.id}>
+                      <Task data={item} toggle={toggleCompletion} revert={revertTask}/>
+                    </li>
+                  )):
+                  tasks.filter(item => item.completed == true).map(item => (
+                    <li key={item.id}>
+                      <Task data={item} toggle={toggleCompletion} revert={revertTask}/>
+                    </li>
+                  ))
+                }
               </div>
               {changesMade == true? 
                 <div>
