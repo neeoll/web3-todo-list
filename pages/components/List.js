@@ -43,12 +43,8 @@ export default function List(props) {
     getData()
   }, [])
 
-  async function route() {
-    const slug = listTitle.replace(/\s/g, '-')
-    router.push({ 
-      pathname: `lists/${slug}`, 
-      query: { address: props.address }
-    }, `lists/${slug}`)
+  function route() {
+    props.route(listTitle, props.address)
   }
 
   return (

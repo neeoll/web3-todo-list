@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Main from '../../artifacts/contracts/Main.sol/Main.json'
 import { ethers } from 'ethers'
 import { contractAddress } from '../../config'
+import Link from 'next/link'
 
 export default function Lists() {
 
@@ -23,8 +24,13 @@ export default function Lists() {
     getLists()
   }, [])
 
-  function createRoute() { router.push('create_list') }
-  function addRoute() { router.push('add_list') }
+  const listRoute = (listName, listAddr) => {
+    const slug = listName.replace(/\s/g, '-')
+    router.push({ 
+      pathname: `lists/${slug}`, 
+      query: { address: listAddr }
+    }, `lists/${slug}`)
+  }
 
   return (
     <div className="container">
@@ -32,13 +38,13 @@ export default function Lists() {
         <div className="col-md-12">
           <div className="card">
             <div className="card-body">
-              <button className="save" onClick={createRoute}>Create New List</button> 
-              <button className="save" onClick={addRoute}>Add List By Address</button> 
+              <Link href={'create_list'}><button className="save">Create New List</button></Link>
+              <Link href={'add_list'}><button className="save">Add List By Address</button></Link>
               <div className="card-list">
-                { lists.length == 0 ? <h4>You currently have no lists, time to make one!</h4> : null }
+                { lists.length == 0 ? <h4>You don\'t have any lists, time to make one!</h4> : null }
                 { lists.map(item => (
                   <li key={item.id}>
-                    <List address={item.address} />
+                    <List address={item.address} route={listRoute}/>
                   </li>
                 )) }
               </div>

@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\Noel\\Desktop\\web3-todo-list\\contracts\\Main.sol": {
-      "lastModificationDate": 1654000319439,
-      "contentHash": "f4f1e3b3d6348e0ee929a62d5cf8b316",
+      "lastModificationDate": 1654193597736,
+      "contentHash": "f7a4a0c4f4641f645bba0e5dca7c4a53",
       "sourceName": "contracts/Main.sol",
       "solcConfig": {
         "version": "0.8.9",

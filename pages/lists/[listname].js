@@ -12,15 +12,23 @@ export function getServerSideProps(context) {
 }
 
 export default function Todo({ data }) {
-
-  const [formData, updateForm] = useState()
-  const [changesMade, toggleChangesMade] = useState(false)
-  const [tasks, updateTasks] = useState([])
-  const [permissions, updatePermissions] = useState({})
   
   const listAddress = data
   const userAddress = window.sessionStorage.getItem('userAddress')
   const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const checkChanges = (list) => {
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].changed == true) {
+        return true 
+      }
+    }
+    return false
+  }
+
+  const [formData, updateForm] = useState()
+  const [tasks, updateTasks] = useState([])
+  const [permissions, updatePermissions] = useState({})
+  const [changesMade, toggleChangesMade] = useState(false)
 
   const initialContractLoad = async () => {
     const contract = new ethers.Contract(listAddress, TodoList.abi, provider)
@@ -67,7 +75,7 @@ export default function Todo({ data }) {
       new: true,
       changed: true
     }])
-    toggleChangesMade(true)
+    if (!changesMade) toggleChangesMade(true)
   }
 
   async function modifyWriteAccess(e) {
@@ -106,10 +114,33 @@ export default function Todo({ data }) {
     filteredTasks.forEach((item) => {
       if (item.changed) {
         item.completed = !item.completed
+        item.changed = false
       }
     })
     updateTasks(filteredTasks)
     toggleChangesMade(false)
+  }
+
+  const revertTask = (taskId) => {
+    const index = tasks.findIndex(item => {
+      return item.id == taskId
+    })
+    tasks[index].completed = !tasks[index].completed
+    tasks[index].changed = false
+
+    const filteredTasks = () => {
+      if (tasks[index].new == true) {
+        const temp = tasks.filter(item => {
+          return item.id != taskId
+        })
+        return temp
+      } else {
+        return tasks
+      }
+    }
+    
+    updateTasks(filteredTasks)
+    toggleChangesMade(checkChanges(filteredTasks))
   }
 
   async function addList() {
@@ -123,13 +154,17 @@ export default function Todo({ data }) {
     })
   }
 
-  const toggleCompletion = async(taskId, completed) => {
-    tasks[taskId].completed = completed
-    if (tasks[taskId].new != true) {
-      tasks[taskId].changed = !tasks[taskId].changed
+  const toggleCompletion = (taskId) => {
+    const index = tasks.findIndex(item => {
+      return item.id == taskId
+    })
+    tasks[index].completed = !tasks[index].completed
+
+    if (tasks[index].new == false) {
+      tasks[index].changed = !tasks[index].changed
     }
-    
-    toggleChangesMade(true)
+    console.log(tasks[index])
+    toggleChangesMade(checkChanges(tasks))
   }
   
   return (
@@ -148,8 +183,8 @@ export default function Todo({ data }) {
               </form>
               <div className="card-list">
                 {tasks.map(item => (
-                  <li key={item.id}>
-                    <Task id={item.id} contents={item.content} completed={item.completed} toggle={toggleCompletion}/>
+                  <li className="" key={item.id}>
+                    <Task data={item} toggle={toggleCompletion} revert={revertTask}/>
                   </li>
                 ))}
               </div>
