@@ -16,14 +16,13 @@ export default function List(props) {
       const tasks = []
   
       for (let i = 0; i < data[0].length; i++) {
+        if (data[1][i] == true) continue
         tasks.push({
           id: i,
           contents: data[0][i],
           completed: data[1][i]
         })
       }
-  
-      tasks = tasks.filter(each => !each.completed)
   
       if (tasks.length > 2) {
         tasks = tasks.splice(1)

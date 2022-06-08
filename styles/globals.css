@@ -1,22 +1,3 @@
-#blocker {
-  position:fixed;
-  padding:0;
-  margin:0;
-
-  top:0;
-  left:0;
-
-  width: 100%;
-  height: 100%;
-  background:rgba(255,255,255,0.2);
-  z-index: 1;
-}
-
-.allow {
-  position: absolute;
-  z-index: 1;
-}
-
 body {
   margin-top:20px;
   background: #f8f8f8;
@@ -37,7 +18,7 @@ ul {
 
 .card-list .card-item {
   padding: 15px;
-  margin: 5px 0px 5px 0px;
+  margin: 10px 0px 10px 0px;
   border-radius: 0;
   background: #f7f7f7
 }
@@ -50,7 +31,7 @@ div.checker {
 div.checker input,
 div.checker span {
   width: 18px;
-  height: 18px
+  height: 18px;
 }
 
 div.checker span {
@@ -89,6 +70,7 @@ div.checker input:hover {
 
 div.card {
   padding: 25px;
+  margin-top: 20px;
   margin-bottom: 20px;
   border: initial;
   background: #fff;
@@ -117,6 +99,19 @@ p.address {
   text-decoration: line-through;
 }
 
+.form-control {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+div.card-body-blocked {
+  pointer-events: none;
+}
+
+#addButton {
+  pointer-events: all;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     background: #292929;
@@ -141,25 +136,18 @@ p.address {
 
   div.card {
     color: #fff;
-    padding: 25px;
-    margin: 20px;
-    border: initial;
     background: #191919;
-    border-radius: calc(.15rem - 1px);
-    box-shadow: 0 1px 15px rgba(0,0,0,0.04), 0 1px 6px rgba(0,0,0,0.04);
   }
 
   input[type="text"]  {
     background: #191919;
     border-color: #292929;
-    border-width: 2.5px;
     color: #fff;
   }
 
   input[type="text"]:focus-within  {
     background: #191919;
     border-color: #292929;
-    border-width: 2.5px;
     color: #fff;
   }
 

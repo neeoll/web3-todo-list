@@ -87,15 +87,19 @@ export default function Lists() {
               <button className="save" onClick={() => { toggleCreating(true), toggleAdding(false) }}>Create New List</button>
               <button className="save" onClick={() => { toggleAdding(true), toggleCreating(false) }}>Add List By Address</button>
               {creatingList == true?
-                <form>
-                  <input className="form-control add-task" onKeyDown={handleKeyPress} type="text" placeholder="Name" name="listName" onChange={e => fillForm(e.target.value)} required/>
-                </form>:
-                null
-              }
-              {addingList == true?
-                <form>
-                  <input className="form-control add-task" onKeyDown={handleKeyPress} type="text" placeholder="Address" name="listAddress" onChange={e => fillForm(e.target.value)} required/>
-                </form>:
+                <>
+                  <button className="cancel" onClick={() => { toggleAdding(false), toggleCreating(false) }}>Cancel</button>
+                  <form>
+                    <input className="form-control add-task" onKeyDown={handleKeyPress} type="text" placeholder="Name" name="listName" onChange={e => fillForm(e.target.value)} required/>
+                  </form>
+                </>:
+                addingList == true?
+                <>
+                  <button className="cancel" onClick={() => { toggleAdding(false), toggleCreating(false) }}>Cancel</button>
+                  <form>
+                    <input className="form-control add-task" onKeyDown={handleKeyPress} type="text" placeholder="Address" name="listAddress" onChange={e => fillForm(e.target.value)} required/>
+                  </form>
+                </>:
                 null
               }
               <div className="card-list">

@@ -1,23 +1,26 @@
-import { useState } from "react"
+import { useState, useEffect } from 'react'
 
-export default function Task(props) {
+export default function Task({data, toggle, revert}) {
+  const [propsData, updateProps] = useState(data)
 
-  const [propsData, updateProps] = useState(props.data);
-
-  const toggle = () => {
-    props.toggle(propsData.id)
+  const toggleCompletion = () => {
+    toggle(propsData.id, !propsData.completed)
   }
   
-  const revert = () => {
-    props.revert(propsData.id)
+  const revertTask = () => {
+    revert(propsData.id)
   }
+
+  useEffect(() => {
+    updateProps(data)
+  }, [data])
 
   return(
     <div className="card-item">
-      <div className="checker"><span className=""><input type="checkbox" onChange={toggle} checked={propsData.completed}/></span></div>
+      <div className="checker"><span className=""><input type="checkbox" onChange={toggleCompletion} checked={propsData.completed}/></span></div>
       <span className={propsData.completed == true? "completed-content": null}>{propsData.content}</span>
       {propsData.changed === true?
-        <button onClick={revert}>Revert</button>:
+        <button className="cancel" onClick={revertTask}>Revert</button>:
         null
       }
     </div>
