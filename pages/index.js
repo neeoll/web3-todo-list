@@ -53,6 +53,7 @@ export default function Home() {
         </Dialog.Portal>
       </Dialog.Root>
       <StyledButton type={'save'} onClick={() => {router.push('https://github.com/neeoll/web3-todo-list')}}>Repository</StyledButton>
+      <span>*Switch to Goerli Testnet before proceeding*</span>
     </StyledCard>
   )
 }
