@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
+import TodoList from '../artifacts/contracts/TodoList.sol/TodoList.json'
 import Web3Modal from 'web3modal'
-import { providerOptions } from '../../providerOptions'
-import { StyledCardItem } from '../../Primitives';
+import { providerOptions } from '../providerOptions'
+import { StyledCardItem } from '../Primitives';
 
-export default function List(props) {
+const List = (props) => {
   const [listTitle, setTitle] = useState()
   const [listData, setListData] = useState([])
 
@@ -62,3 +62,5 @@ export default function List(props) {
     </StyledCardItem>
   )
 }
+
+export default List

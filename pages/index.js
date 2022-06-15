@@ -4,27 +4,21 @@ import { ethers } from 'ethers'
 import { providerOptions } from '../providerOptions'
 import * as Dialog from '@radix-ui/react-dialog'
 import { StyledCard, StyledButton, StyledActions } from '../Primitives'
-
-import DialogModal from './components/DialogModal'
+import DialogModal from '../components/DialogModal'
 import { styled } from '@stitches/react'
 
 export default function Home() {
   const router = useRouter()
 
   const connectWalletHandler = async(_network) => {
-    console.log(_network)
     try {
       const web3modal = new Web3Modal({
         cacheProvider: true,
         providerOptions
       })
-      console.log(web3modal)
       const library = await web3modal.connectTo(_network);
-      console.log(library)
       const provider = new ethers.providers.Web3Provider(library);
-      console.log(provider)
       const accounts = await provider.listAccounts();
-      console.log(accounts)
       
       if (accounts) {
         window.sessionStorage.setItem('userAddress', accounts[0])

@@ -1,9 +1,9 @@
-import Metamask from '../../public/metamask.svg'
-import WalletConnect from '../../public/walletconnect.svg'
-import Coinbase from '../../public/coinbase.svg'
+import Metamask from '../public/metamask.svg'
+import WalletConnect from '../public/walletconnect.svg'
+import Coinbase from '../public/coinbase.svg'
 import { styled } from "@stitches/react"
 
-export default function DialogModal({ select })  {
+const DialogModal = ({ select }) => {
   return (
     <>
       <StyledHeader>Choose a Provider</StyledHeader>
@@ -59,3 +59,5 @@ const StyledGridContents = styled('div', {
   display: 'flex',
   justifyContent: 'center'
 })
+
+export default DialogModal

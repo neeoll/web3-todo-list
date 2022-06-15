@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { DividerHorizontalIcon, CheckIcon } from '@radix-ui/react-icons'
-import { StyledCardItem, StyledButton } from '../../Primitives'
+import { StyledCardItem, StyledButton } from '../Primitives'
 import * as Checkbox from '@radix-ui/react-checkbox'
 import { styled } from '@stitches/react'
 import { violet } from '@radix-ui/colors'
 
-export default function Task({data, toggle, revert}) {
+const Task = ({data, toggle, revert}) => {
   const [propsData, updateProps] = useState(data)
   useEffect(() => {
     updateProps(data)
@@ -61,3 +61,5 @@ const StyledContent = styled('span', {
     }
   }
 })
+
+export default Task

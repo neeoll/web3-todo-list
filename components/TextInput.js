@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { styled } from '@stitches/react';
 
-export default function TextInput({ submit, maxLength, children}) {
+const TextInput = ({ submit, maxLength, children}) => {
   const [formData, updateForm] = useState('')
 
   const handleKeyPress = (e) => {
@@ -27,3 +27,5 @@ const StyledTextInput = styled('input', {
   color: '#fff',
   margin: 5,
 })
+
+export default TextInput

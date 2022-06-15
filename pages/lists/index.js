@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
-import List from '../components/List'
-import TextInput from '../components/TextInput'
+import List from '../../components/List'
+import TextInput from '../../components/TextInput'
 import { useState, useEffect } from 'react'
 import Main from '../../artifacts/contracts/Main.sol/Main.json'
 import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
