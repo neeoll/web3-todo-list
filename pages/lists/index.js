@@ -6,9 +6,9 @@ import Main from '../../artifacts/contracts/Main.sol/Main.json'
 import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
 import { ethers } from 'ethers'
 import { contractAddress } from '../../config'
-import { StyledCard, StyledActions, StyledCardList, StyledButton } from '../components/Primitives'
+import { StyledCard, StyledActions, StyledCardList, StyledButton } from '../../Primitives'
 import Web3Modal from 'web3modal'
-import { providerOptions } from '../providerOptions'
+import { providerOptions } from '../../providerOptions'
 
 export default function Lists() {
   const [lists, updateLists] = useState([])

@@ -3,12 +3,12 @@ import { ethers, utils } from 'ethers'
 import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
 import Task from '../components/Task'
 import TextInput from '../components/TextInput'
-import { StyledCard, StyledForm, StyledActions, StyledButton } from '../components/Primitives'
+import { StyledCard, StyledForm, StyledActions, StyledButton } from '../../Primitives'
 import { violet, mauve } from '@radix-ui/colors'
 import { styled } from '@stitches/react'
 import * as Tabs from '@radix-ui/react-tabs'
 import Web3Modal from 'web3modal'
-import { providerOptions } from '../providerOptions'
+import { providerOptions } from '../../providerOptions'
 
 export function getServerSideProps(context) {
   return {

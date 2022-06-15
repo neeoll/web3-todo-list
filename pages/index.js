@@ -1,27 +1,30 @@
-import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Web3Modal from 'web3modal'
 import { ethers } from 'ethers'
-import { providerOptions } from './providerOptions'
+import { providerOptions } from '../providerOptions'
 import * as Dialog from '@radix-ui/react-dialog'
-import { StyledCard, StyledActions, StyledButton } from './components/Primitives'
-import { Modal } from './components/Modal'
+import { StyledCard, StyledButton, StyledActions } from '../Primitives'
+
+import DialogModal from './components/DialogModal'
 import { styled } from '@stitches/react'
 
 export default function Home() {
   const router = useRouter()
-  const [errorMessage, setErrorMessage] = useState()
 
   const connectWalletHandler = async(_network) => {
+    console.log(_network)
     try {
       const web3modal = new Web3Modal({
-        network: 'localhost',
         cacheProvider: true,
         providerOptions
       })
+      console.log(web3modal)
       const library = await web3modal.connectTo(_network);
+      console.log(library)
       const provider = new ethers.providers.Web3Provider(library);
+      console.log(provider)
       const accounts = await provider.listAccounts();
+      console.log(accounts)
       
       if (accounts) {
         window.sessionStorage.setItem('userAddress', accounts[0])
@@ -32,7 +35,7 @@ export default function Home() {
         }, '/lists')
       }
     } catch (error) {
-      setErrorMessage(error);
+      console.log(error);
     }
   }
 
@@ -45,7 +48,7 @@ export default function Home() {
         <Dialog.Portal>
           <StyledOverlay>
             <StyledDialogContent>
-              <Modal select={connectWalletHandler}/>
+              <DialogModal select={connectWalletHandler}/>
               <Dialog.Close asChild>
                 <StyledActions>
                   <StyledButton type={'cancel'}>Close</StyledButton>
@@ -55,7 +58,6 @@ export default function Home() {
           </StyledOverlay>
         </Dialog.Portal>
       </Dialog.Root>
-      {errorMessage}
       <StyledButton type={'save'} onClick={() => {router.push('https://github.com/neeoll/web3-todo-list')}}>Repository</StyledButton>
     </StyledCard>
   )

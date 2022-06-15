@@ -3,18 +3,18 @@ import WalletConnect from '../../public/walletconnect.svg'
 import Coinbase from '../../public/coinbase.svg'
 import { styled } from "@stitches/react"
 
-export const Modal = ({ select }) => {
+export default function DialogModal({ select })  {
   return (
     <>
       <StyledHeader>Choose a Provider</StyledHeader>
       <StyledGrid>
-        <StyledGridItem position={'one'} onClick={() => { select('injected')}}>
+        <StyledGridItem position={'one'} onClick={() => { select('injected') }}>
             <StyledGridContents><Metamask /></StyledGridContents>
         </StyledGridItem>
-        <StyledGridItem position={'two'} onClick={() => { select('walletconnect')}}>
+        <StyledGridItem position={'two'} onClick={() => { select('walletconnect') }}>
           <StyledGridContents><WalletConnect /></StyledGridContents>
         </StyledGridItem>
-        <StyledGridItem position={'three'} onClick={() => { select('coinbasewallet')}}>
+        <StyledGridItem position={'three'} onClick={() => { select('coinbasewallet') }}>
           <StyledGridContents><Coinbase /></StyledGridContents>
         </StyledGridItem>
       </StyledGrid>
