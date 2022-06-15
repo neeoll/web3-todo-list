@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
+import { ethers, utils } from 'ethers'
 import TodoList from '../../artifacts/contracts/TodoList.sol/TodoList.json'
 import Task from '../components/Task'
+import TextInput from '../components/TextInput'
+import { StyledCard, StyledForm, StyledActions, StyledButton } from '../components/Primitives'
+import { violet, mauve } from '@radix-ui/colors'
+import { styled } from '@stitches/react'
+import * as Tabs from '@radix-ui/react-tabs'
+import Web3Modal from 'web3modal'
+import { providerOptions } from '../providerOptions'
 
 export function getServerSideProps(context) {
   return {
@@ -12,15 +19,20 @@ export function getServerSideProps(context) {
 }
 
 export default function Todo({ data }) {
-  const [currentTab, changeTab] = useState('all')
-  const [formData, updateForm] = useState()
   const [tasks, updateTasks] = useState([])
   const [permissions, updatePermissions] = useState({})
   const [changesMade, toggleChangesMade] = useState(false)
+  const [costEstimate, updateEstimate] = useState()
 
   useEffect(() => {
     const initialContractLoad = async() => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const web3modal = new Web3Modal({
+        network: 'localhost',
+        cacheProvider: true,
+        providerOptions
+      })
+      const library = await web3modal.connectTo(window.sessionStorage.getItem('network'));
+      const provider = new ethers.providers.Web3Provider(library);
       const contract = new ethers.Contract(data, TodoList.abi, provider)
       const contractData = await contract.getData()
       const _tasks = []
@@ -28,7 +40,7 @@ export default function Todo({ data }) {
       for (let i = 0; i < contractData[0].length; i++) {
         _tasks.push({
           id: i,
-          content: contractData[0][i],
+          content: ethers.utils.parseBytes32String(contractData[0][i]),
           completed: contractData[1][i],
           new: false,
           changed: false
@@ -44,16 +56,23 @@ export default function Todo({ data }) {
     initialContractLoad()
   }, [data])
 
-  const handleKeyPress = (e) => {
-    if (e.keyCode == 13) { 
-      if (document.activeElement.name == 'taskName') {
-        addTask(e) 
-      } else {
-        modifyWriteAccess(e)
-      }
-      document.activeElement.value = ''
+  useEffect(() => {
+    const estimateGas = async() => {
+      const web3modal = new Web3Modal({
+        network: 'localhost',
+        cacheProvider: true,
+        providerOptions
+      })
+      const library = await web3modal.connectTo(window.sessionStorage.getItem('network'));
+      const provider = new ethers.providers.Web3Provider(library);
+      const feeData = await provider.getFeeData()
+      const costEstimate = feeData.maxFeePerGas * 204838
+      const cost = utils.formatUnits(costEstimate, 'ether')
+      
+      updateEstimate(cost)
     }
-  }
+    estimateGas()
+  }, [])
 
   const checkChanges = (list) => {
     for (let i = 0; i < list.length; i++) {
@@ -64,11 +83,11 @@ export default function Todo({ data }) {
     return false
   }
 
-  const addTask = (e) => {
+  const addTask = (e, name) => {
     e.preventDefault()
     updateTasks([...tasks, {
       id: tasks.length,
-      content: formData.name,
+      content: name,
       completed: false,
       new: true,
       changed: true
@@ -77,12 +96,18 @@ export default function Todo({ data }) {
     if (!changesMade) toggleChangesMade(true)
   }
 
-  const modifyWriteAccess = async(e) => {
-    e.preventDefault()
+  const modifyWriteAccess = async(address) => {
     if (typeof window.ethereum == 'undefined') return
+    const web3modal = new Web3Modal({
+      network: 'localhost',
+      cacheProvider: true,
+      providerOptions
+    })
+    const library = await web3modal.connectTo(window.sessionStorage.getItem('network'));
+    const provider = new ethers.providers.Web3Provider(library);
     const signer = provider.getSigner()
-    const contract = new ethers.Contract(listAddress, TodoList.abi, signer)
-    await contract.grantWriteAccess(formData.address, {from: window.sessionStorage.getItem('userAddress')})
+    const contract = new ethers.Contract(data, TodoList.abi, signer)
+    await contract.grantWriteAccess(address, {from: window.sessionStorage.getItem('userAddress')})
   }
 
   const saveChanges = async() => {
@@ -94,18 +119,32 @@ export default function Todo({ data }) {
     tasks.forEach((item) => {
       if (item.changed == true) {
         changedIds.push(item.id)
-        changedContents.push(item.content)
+        changedContents.push(ethers.utils.formatBytes32String(item.content))
         changedStatuses.push(item.completed)
       }
     })
     
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const web3modal = new Web3Modal({
+      network: 'localhost',
+      cacheProvider: true,
+      providerOptions
+    })
+    const library = await web3modal.connectTo(window.sessionStorage.getItem('network'));
+    const provider = new ethers.providers.Web3Provider(library);
     const signer = provider.getSigner()
-    const contract = new ethers.Contract(listAddress, TodoList.abi, signer)
+    const contract = new ethers.Contract(data, TodoList.abi, signer)
     await contract.saveChanges(changedIds, changedContents, changedStatuses, {from: window.sessionStorage.getItem('userAddress')})
     
     contract.once('ChangesSaved', async (event) => {
       toggleChangesMade(false)
+
+      const copy = [...tasks]
+      copy.forEach((item) => {
+        if (item.new) item.new = false
+        if (item.changed) item.changed = false
+      })
+      
+      updateTasks(copy)
     })
   }
 
@@ -139,10 +178,16 @@ export default function Todo({ data }) {
 
   const addList = async() => {
     if (typeof window.ethereum == 'undefined') return
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const web3modal = new Web3Modal({
+      network: 'localhost',
+      cacheProvider: true,
+      providerOptions
+    })
+    const library = await web3modal.connectTo(window.sessionStorage.getItem('network'));
+    const provider = new ethers.providers.Web3Provider(library);
     const signer = provider.getSigner()
     const contract = new ethers.Contract(contractAddress, Main.abi, signer)
-    await contract.addList(formData.address, {from: window.sessionStorage.getItem('userAddress')})
+    await contract.addList(data, {from: window.sessionStorage.getItem('userAddress')})
     
     contract.once('Add', async (event) => {
       window.location.reload()
@@ -162,64 +207,122 @@ export default function Todo({ data }) {
     
     updateTasks(copy)
     toggleChangesMade(checkChanges(copy))
-    console.log(tasks)
   }
   
   return (
-    <div className="container">
-      <div className="row">
-        <div className="col-md-12">
-          <div className="card">
-            <div className={permissions.writeAccess == true? "card-body": "card-body-blocked"}>
-              <form>
-                <input type="text" onKeyDown={handleKeyPress} className="form-control add-task" placeholder="New Task" name="taskName" onChange={e => updateForm({...formData, name: e.target.value})}/>
-                {
-                  permissions.ownerStatus === true
-                  ? <input type="text" onKeyDown={handleKeyPress} className="form-control add-task" placeholder="Address to Grant Write Access" name="newAddress" onChange={e => updateForm({...formData, address: e.target.value})}/>
-                  : null
-                }
-              </form>
-              <ul className="nav nav-pills todo-nav">
-                <li className='list-tab'><a className='nav-link' onClick={() => changeTab('all')}>All</a></li>
-                <li className='list-tab'><a className='nav-link' onClick={() => changeTab('active')}>Active</a></li>
-                <li className='list-tab'><a className='nav-link' onClick={() => changeTab('completed')}>Completed</a></li>
-              </ul>
-              <div className="card-list">
-                {currentTab == 'all'? 
-                  tasks.map(item => (
-                    <li key={item.id}>
-                      <Task data={item} toggle={toggle} revert={revert}/>
-                    </li>
-                  )): 
-                  currentTab == 'active'?
-                  tasks.filter(item => item.completed == false).map(item => (
-                    <li key={item.id}>
-                      <Task data={item} toggle={toggle} revert={revert}/>
-                    </li>
-                  )):
-                  tasks.filter(item => item.completed == true).map(item => (
-                    <li key={item.id}>
-                      <Task data={item} toggle={toggle} revert={revert}/>
-                    </li>
-                  ))
-                }
-              </div>
-              {changesMade == true? 
-                <div>
-                  <button className="save" onClick={saveChanges}>Save Changes</button>
-                  <button className="cancel" onClick={cancelChanges}>Cancel</button>
-                </div>:
-                null
-              }
-              <p className="address">Address: {data}</p>
-              {permissions.writeAccess === false?
-                <button id="addButton" className="save" onClick={addList}>Save this list</button>: 
-                null 
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <StyledCard writeAccess={permissions.writeAccess}>
+      <StyledForm>
+        <TextInput submit={addTask} maxLength={32}>New Task</TextInput>
+        { permissions.ownerStatus == true && <TextInput submit={modifyWriteAccess} maxLength={50}>Address to Grant Write Access</TextInput> }
+      </StyledForm>
+      <StyledTabs defaultValue='all'>
+        <StyledList>
+          <StyledTrigger value='all' id={'all'} >All</StyledTrigger>
+          <StyledTrigger value='active' id={'active'}>Active</StyledTrigger>
+          <StyledTrigger value='completed' id={'completed'}>Completed</StyledTrigger>
+        </StyledList>
+        <StyledTabsContent value='all'>
+          {tasks.map(item => (
+            <li key={item.id}>
+              <Task data={item} toggle={toggle} revert={revert}/>
+            </li>
+          ))}
+        </StyledTabsContent>
+        <StyledTabsContent value='active'>
+          {tasks.filter(item => item.completed == false).map(item => (
+            <li key={item.id}>
+              <Task data={item} toggle={toggle} revert={revert}/>
+            </li>
+          ))}
+        </StyledTabsContent>
+        <StyledTabsContent value='completed'>
+          {tasks.filter(item => item.completed == true).map(item => (
+            <li key={item.id}>
+              <Task data={item} toggle={toggle} revert={revert}/>
+            </li>
+          ))}
+        </StyledTabsContent>
+      </StyledTabs>
+      {changesMade == true && 
+        <StyledActions>
+          <StyledButton type={'save'} onClick={saveChanges}>Save Changes</StyledButton>
+          <StyledButton type={'cancel'} onClick={cancelChanges}>Cancel</StyledButton>
+        </StyledActions>
+      }
+      {permissions.writeAccess === false &&
+        <StyledActions>
+          <StyledButton type={'save'} ignoreBlock={true} onClick={addList}>Save this list</StyledButton>
+        </StyledActions>
+      }
+      <p className="address">Address: {data}</p>
+      <p className='address'>Max Transaction Fee: {costEstimate} Ether</p>
+    </StyledCard>
   )
 }
+
+const StyledTabs = styled(Tabs.Root, {
+  display: 'flex',
+  flexDirection: 'column',
+  width: 'auto',
+  marginBottom: 10
+});
+
+const StyledList = styled(Tabs.List, {
+  flexShrink: 0,
+  display: 'flex',
+  borderBottom: `1px solid #393939`,
+});
+
+const StyledTrigger = styled(Tabs.Trigger, {
+  all: 'unset',
+  fontFamily: 'inherit',
+  backgroundColor: '#191919',
+  padding: '0 20px',
+  height: 45,
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 15,
+  lineHeight: 1,
+  color: mauve.mauve11,
+  userSelect: 'none',
+  '&:first-child': { borderTopLeftRadius: 6 },
+  '&:last-child': { borderTopRightRadius: 6 },
+  '&:hover': { color: violet.violet11 },
+  variants: {
+    id: {
+      'all': {
+        '&:hover': { color: violet.violet11 },
+        '&[data-state="active"]': {
+          color: violet.violet11,
+          boxShadow: 'inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor',
+        }
+      }, 
+      'active': {
+        '&:hover': { color: '#F71919' },
+        '&[data-state="active"]': {
+          color: '#F71919',
+          boxShadow: 'inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor',
+        }
+      },
+      'completed': {
+        '&:hover': { color: '#0075FF' },
+        '&[data-state="active"]': {
+          color: '#0075FF',
+          boxShadow: 'inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor',
+        }
+      }
+    }
+  },
+})
+
+const StyledTabsContent = styled(Tabs.Content, {
+  listStyle: 'none',
+  flexGrow: 1,
+  padding: 20,
+  backgroundColor: '#191919',
+  borderBottomLeftRadius: 6,
+  borderBottomRightRadius: 6,
+  outline: 'none',
+})

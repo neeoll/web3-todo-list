@@ -10,7 +10,7 @@ contract Main {
 
     mapping(address => TodoList[]) lists;
 
-    function createList(string memory title) public {
+    function createList(bytes32 title) public {
         TodoList list = new TodoList(title, msg.sender, lists[msg.sender].length);
         lists[msg.sender].push(list);
 
