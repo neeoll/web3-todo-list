@@ -1,7 +1,7 @@
-import '../styles/globals.css'
-import Head from 'next/head'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'jquery'
+import "../styles/globals.css";
+import Head from "next/head";
+import "bootstrap/dist/css/bootstrap.css";
+import "jquery";
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -13,7 +13,7 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <Component {...pageProps} />
     </>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;
