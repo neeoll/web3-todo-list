@@ -8,6 +8,8 @@ import {
   StyledForm,
   StyledActions,
   StyledButton,
+  StyledDiv,
+  StyledText,
 } from "../../Primitives";
 import { violet, mauve } from "@radix-ui/colors";
 import { styled } from "@stitches/react";
@@ -238,57 +240,59 @@ export default function Todo({ data }) {
   };
 
   return (
-    <StyledCard writeAccess={permissions.writeAccess}>
-      <StyledForm>
-        <TextInput submit={addTask} maxLength={32}>
+    <StyledCard writeAccess={permissions.writeAccess} page={"list"}>
+      <StyledForm className={"form"}>
+        <TextInput submit={addTask} maxLength={32} page={"list"}>
           New Task
         </TextInput>
         {permissions.ownerStatus == true && (
-          <TextInput submit={modifyWriteAccess} maxLength={50}>
+          <TextInput submit={modifyWriteAccess} maxLength={50} page={"list"}>
             Address to Grant Write Access
           </TextInput>
         )}
       </StyledForm>
-      <StyledTabs defaultValue="all">
-        <StyledList>
-          <StyledTrigger value="all" id={"all"}>
-            All
-          </StyledTrigger>
-          <StyledTrigger value="active" id={"active"}>
-            Active
-          </StyledTrigger>
-          <StyledTrigger value="completed" id={"completed"}>
-            Completed
-          </StyledTrigger>
-        </StyledList>
-        <StyledTabsContent value="all">
-          {tasks.map((item) => (
-            <li key={item.id}>
-              <Task data={item} toggle={toggle} revert={revert} />
-            </li>
-          ))}
-        </StyledTabsContent>
-        <StyledTabsContent value="active">
-          {tasks
-            .filter((item) => item.completed == false)
-            .map((item) => (
+      <StyledDiv className={"contents"}>
+        <StyledTabs defaultValue="all">
+          <StyledList>
+            <StyledTrigger value="all" id={"all"}>
+              All
+            </StyledTrigger>
+            <StyledTrigger value="active" id={"active"}>
+              Active
+            </StyledTrigger>
+            <StyledTrigger value="completed" id={"completed"}>
+              Completed
+            </StyledTrigger>
+          </StyledList>
+          <StyledTabsContent value="all">
+            {tasks.map((item) => (
               <li key={item.id}>
                 <Task data={item} toggle={toggle} revert={revert} />
               </li>
             ))}
-        </StyledTabsContent>
-        <StyledTabsContent value="completed">
-          {tasks
-            .filter((item) => item.completed == true)
-            .map((item) => (
-              <li key={item.id}>
-                <Task data={item} toggle={toggle} revert={revert} />
-              </li>
-            ))}
-        </StyledTabsContent>
-      </StyledTabs>
+          </StyledTabsContent>
+          <StyledTabsContent value="active">
+            {tasks
+              .filter((item) => item.completed == false)
+              .map((item) => (
+                <li key={item.id}>
+                  <Task data={item} toggle={toggle} revert={revert} />
+                </li>
+              ))}
+          </StyledTabsContent>
+          <StyledTabsContent value="completed">
+            {tasks
+              .filter((item) => item.completed == true)
+              .map((item) => (
+                <li key={item.id}>
+                  <Task data={item} toggle={toggle} revert={revert} />
+                </li>
+              ))}
+          </StyledTabsContent>
+        </StyledTabs>
+      </StyledDiv>
       {changesMade == true && (
-        <StyledActions>
+        <StyledActions className={"actions"}>
           <StyledButton type={"save"} onClick={saveChanges}>
             Save Changes
           </StyledButton>
@@ -298,14 +302,16 @@ export default function Todo({ data }) {
         </StyledActions>
       )}
       {permissions.writeAccess === false && (
-        <StyledActions>
+        <StyledActions className={"actions"}>
           <StyledButton type={"save"} ignoreBlock={true} onClick={addList}>
             Save this list
           </StyledButton>
         </StyledActions>
       )}
-      <p className="address">Address: {data}</p>
-      <p className="address">Max Transaction Fee: {costEstimate} Ether</p>
+      <StyledText className={"footer"}>
+        <p className="address">Address: {data}</p>
+        <p className="address">Max Transaction Fee: {costEstimate} Ether</p>
+      </StyledText>
     </StyledCard>
   );
 }

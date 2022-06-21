@@ -28,8 +28,8 @@ const Task = ({ data, toggle, revert }) => {
   };
 
   return (
-    <StyledCardItem>
-      <StyledCheckbox checked={checked} onCheckedChange={toggleCompletion}>
+    <StyledCardItem type={"task"} onClick={toggleCompletion}>
+      <StyledCheckbox checked={checked}>
         <StyledIndicator>
           {checked === "indeterminate" && <DividerHorizontalIcon />}
           {checked === true && <CheckIcon />}

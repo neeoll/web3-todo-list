@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { styled } from "@stitches/react";
 
-const TextInput = ({ submit, maxLength, children }) => {
+const TextInput = ({ submit, maxLength, page, children }) => {
   const [formData, updateForm] = useState("");
 
   const handleKeyPress = (e) => {
@@ -18,6 +18,7 @@ const TextInput = ({ submit, maxLength, children }) => {
       placeholder={children}
       onChange={(e) => updateForm(e.target.value)}
       maxLength={maxLength}
+      page={page}
     />
   );
 };
@@ -28,10 +29,19 @@ const StyledTextInput = styled("input", {
   border: "none",
   borderRadius: 5,
   width: "100%",
-  height: "100%",
-  padding: 5,
+  height: "auto",
+  paddingTop: 10,
+  paddingBottom: 10,
+  paddingLeft: 20,
+  paddingRight: 20,
   color: "#fff",
-  margin: 5,
+  variants: {
+    page: {
+      list: {
+        width: "45%",
+      },
+    },
+  },
 });
 
 export default TextInput;

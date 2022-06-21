@@ -14,8 +14,11 @@ const DialogModal = ({ select }) => {
             select("injected");
           }}
         >
-          <StyledGridContents>
+          <StyledGridContents icon={true}>
             <Metamask />
+          </StyledGridContents>
+          <StyledGridContents icon={false}>
+            Connect with Metamask
           </StyledGridContents>
         </StyledGridItem>
         <StyledGridItem
@@ -24,8 +27,11 @@ const DialogModal = ({ select }) => {
             select("walletconnect");
           }}
         >
-          <StyledGridContents>
+          <StyledGridContents icon={true}>
             <WalletConnect />
+          </StyledGridContents>
+          <StyledGridContents icon={false}>
+            Connect with WalletConnect
           </StyledGridContents>
         </StyledGridItem>
         <StyledGridItem
@@ -34,8 +40,11 @@ const DialogModal = ({ select }) => {
             select("coinbasewallet");
           }}
         >
-          <StyledGridContents>
+          <StyledGridContents icon={true}>
             <Coinbase />
+          </StyledGridContents>
+          <StyledGridContents icon={false}>
+            Connect with Coinbase
           </StyledGridContents>
         </StyledGridItem>
       </StyledGrid>
@@ -52,23 +61,22 @@ const StyledHeader = styled("h2", {
 
 const StyledGrid = styled("div", {
   display: "grid",
-  marginBottom: 10,
 });
 
 const StyledGridItem = styled("div", {
-  width: 200,
-  height: 175,
+  width: "100%",
   borderRadius: 5,
-  margin: 10,
+  marginBottom: 10,
+  padding: 5,
   display: "flex",
   justifyContent: "center",
+  alignItems: "center",
   backgroundColor: "#191919",
   variants: {
     position: {
-      one: { gridRow: 1, gridColumn: 1, marginRight: 5, marginBottom: 5 },
-      two: { gridRow: 1, gridColumn: 2, marginLeft: 5, marginBottom: 5 },
-      three: { gridRow: 2, gridColumn: 1, marginRight: 5, marginTop: 5 },
-      four: { gridRow: 2, gridColumn: 2, marginLeft: 5, marginTop: 5 },
+      one: { gridRow: 1, gridColumn: 1, marginBottom: 5 },
+      two: { gridRow: 2, gridColumn: 1, marginBottom: 5 },
+      three: { gridRow: 3, gridColumn: 1, marginBottom: 5 },
     },
   },
   "&:hover": {
@@ -78,9 +86,19 @@ const StyledGridItem = styled("div", {
 });
 
 const StyledGridContents = styled("div", {
-  paddingTop: 23.5,
-  display: "flex",
-  justifyContent: "center",
+  width: "100%",
+  variants: {
+    icon: {
+      true: {
+        width: "30%",
+        marginRight: 10,
+      },
+      false: {
+        display: "flex",
+        justifyContent: "center",
+      },
+    },
+  },
 });
 
 export default DialogModal;

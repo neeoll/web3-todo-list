@@ -1,17 +1,5 @@
-p.address {
-  color: #838383;
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     background: #292929;
-  }
-  
-  div#__next {
-    background: #292929;
-  }
-
-  p.address {
-    color: #3b3b3b;
   }
 }

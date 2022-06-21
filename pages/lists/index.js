@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import List from "../../components/List";
+import ListContents from "../../components/ListContents";
 import TextInput from "../../components/TextInput";
 import { useState, useEffect } from "react";
 import Main from "../../artifacts/contracts/Main.sol/Main.json";
@@ -11,11 +12,13 @@ import {
   StyledActions,
   StyledCardList,
   StyledButton,
+  StyledForm,
 } from "../../Primitives";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../../providerOptions";
 
 export default function Lists() {
+  const [activeList, updateActive] = useState("");
   const [lists, updateLists] = useState([]);
   const [creatingList, toggleCreating] = useState(false);
   const [addingList, toggleAdding] = useState(false);
@@ -36,13 +39,19 @@ export default function Lists() {
       const contractData = await contract.getLists({
         from: window.sessionStorage.getItem("userAddress"),
       });
-      const _lists = [];
 
-      for (let i = 0; i < contractData.length; i++) {
-        _lists.push({ id: i, address: contractData[i] });
+      switch (contractData.length == 0) {
+        case true:
+          return;
+        case false: {
+          const _lists = [];
+          for (let i = 0; i < contractData.length; i++) {
+            _lists.push({ id: i, address: contractData[i] });
+          }
+
+          updateLists(_lists);
+        }
       }
-
-      updateLists(_lists);
     };
     getLists();
   }, []);
@@ -97,9 +106,13 @@ export default function Lists() {
     );
   };
 
+  const changeActiveTask = (_address) => {
+    updateActive(_address);
+  };
+
   return (
-    <StyledCard>
-      <StyledActions>
+    <StyledCard page={"lists"}>
+      <StyledActions className={"header"}>
         <StyledButton
           type={"save"}
           onClick={() => {
@@ -116,40 +129,54 @@ export default function Lists() {
         >
           Add List By Address
         </StyledButton>
-        {creatingList ||
-          (addingList == true && (
-            <StyledButton
-              type={"cancel"}
-              onClick={() => {
-                toggleAdding(false), toggleCreating(false);
-              }}
-            >
-              Cancel
-            </StyledButton>
-          ))}
-        {creatingList == true && (
-          <form>
-            <TextInput submit={contractCreate} maxLength={32}>
-              Name
-            </TextInput>
-          </form>
-        )}
-        {addingList == true && (
-          <form>
-            <TextInput submit={routeToList}>Address</TextInput>
-          </form>
+        {(creatingList || addingList) && (
+          <StyledButton
+            type={"cancel"}
+            onClick={() => {
+              toggleAdding(false), toggleCreating(false);
+            }}
+          >
+            Cancel
+          </StyledButton>
         )}
       </StyledActions>
-      <StyledCardList>
-        {lists.length == 0 && (
-          <h4>{"You don't have any lists, time to make one!"}</h4>
-        )}
-        {lists.map((item) => (
-          <li key={item.id}>
-            <List address={item.address} route={listRoute} />
-          </li>
-        ))}
-      </StyledCardList>
+      {creatingList == true && (
+        <StyledForm className={"form"}>
+          <TextInput submit={contractCreate} maxLength={32}>
+            Name
+          </TextInput>
+        </StyledForm>
+      )}
+      {addingList == true && (
+        <StyledForm className={"form"}>
+          <TextInput submit={routeToList}>Address</TextInput>
+        </StyledForm>
+      )}
+      {lists.length == 0 ? (
+        "You don't have any lists, time to make one!"
+      ) : (
+        <>
+          <StyledCardList className={"lists"}>
+            {lists.length == 0 && (
+              <h4>{"You don't have any lists, time to make one!"}</h4>
+            )}
+            {lists.map((item) => (
+              <li key={item.id}>
+                <List
+                  address={item.address}
+                  route={listRoute}
+                  setActive={changeActiveTask}
+                />
+              </li>
+            ))}
+          </StyledCardList>
+          {activeList == "" ? null : (
+            <StyledCardList className={"contents"}>
+              <ListContents address={activeList} />
+            </StyledCardList>
+          )}
+        </>
+      )}
     </StyledCard>
   );
 }

@@ -3,11 +3,10 @@ import { ethers } from "ethers";
 import TodoList from "../artifacts/contracts/TodoList.sol/TodoList.json";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../providerOptions";
-import { StyledCardItem } from "../Primitives";
+import { StyledButton, StyledCardItem } from "../Primitives";
 
 const List = (props) => {
   const [listTitle, setTitle] = useState();
-  const [listData, setListData] = useState([]);
 
   useEffect(() => {
     const getData = async () => {
@@ -26,29 +25,8 @@ const List = (props) => {
         provider
       );
       const title = ethers.utils.parseBytes32String(await contract.getTitle());
-      const data = await contract.getData();
-      const tasks = [];
-
-      for (let i = 0; i < data[0].length; i++) {
-        if (data[1][i] == true) continue;
-        tasks.push({
-          id: i,
-          contents: ethers.utils.parseBytes32String(data[0][i]),
-          completed: data[1][i],
-        });
-      }
-
-      if (tasks.length > 2) {
-        tasks = tasks.splice(1);
-        tasks.push({
-          id: 100,
-          contents: "...",
-          completed: false,
-        });
-      }
 
       setTitle(title);
-      setListData(tasks);
     };
     getData();
   }, [props]);
@@ -57,16 +35,15 @@ const List = (props) => {
     props.route(listTitle, props.address);
   };
 
+  const setActive = () => {
+    props.setActive(props.address);
+  };
+
   return (
-    <StyledCardItem>
+    <StyledCardItem type={"list"} onClick={setActive}>
       <a className="nav-link" onClick={route}>
         {listTitle}
       </a>
-      {listData.map((item) => (
-        <li key={item.id}>
-          <p>{item.contents}</p>
-        </li>
-      ))}
     </StyledCardItem>
   );
 };

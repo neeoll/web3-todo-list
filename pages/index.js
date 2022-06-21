@@ -3,7 +3,12 @@ import Web3Modal from "web3modal";
 import { ethers } from "ethers";
 import { providerOptions } from "../providerOptions";
 import * as Dialog from "@radix-ui/react-dialog";
-import { StyledCard, StyledButton, StyledActions } from "../Primitives";
+import {
+  StyledCard,
+  StyledButton,
+  StyledActions,
+  StyledText,
+} from "../Primitives";
 import DialogModal from "../components/DialogModal";
 import { styled } from "@stitches/react";
 
@@ -38,32 +43,40 @@ export default function Home() {
 
   return (
     <StyledCard page={"connect"}>
-      <Dialog.Root>
-        <Dialog.Trigger asChild>
-          <StyledButton type={"save"}>Connect Wallet</StyledButton>
-        </Dialog.Trigger>
-        <Dialog.Portal>
-          <StyledOverlay>
-            <StyledDialogContent>
-              <DialogModal select={connectWalletHandler} />
-              <Dialog.Close asChild>
-                <StyledActions>
-                  <StyledButton type={"cancel"}>Close</StyledButton>
-                </StyledActions>
-              </Dialog.Close>
-            </StyledDialogContent>
-          </StyledOverlay>
-        </Dialog.Portal>
-      </Dialog.Root>
-      <StyledButton
-        type={"save"}
-        onClick={() => {
-          router.push("https://github.com/neeoll/web3-todo-list");
-        }}
-      >
-        Repository
-      </StyledButton>
-      <span>*Switch to Goerli Testnet before proceeding*</span>
+      <StyledActions className={"header"}>
+        <Dialog.Root>
+          <Dialog.Trigger asChild>
+            <StyledButton type={"save"}>Connect Wallet</StyledButton>
+          </Dialog.Trigger>
+          <Dialog.Portal>
+            <StyledOverlay>
+              <StyledDialogContent>
+                <DialogModal select={connectWalletHandler} />
+                <Dialog.Close asChild>
+                  <StyledActions>
+                    <StyledButton type={"cancel"}>Close</StyledButton>
+                  </StyledActions>
+                </Dialog.Close>
+              </StyledDialogContent>
+            </StyledOverlay>
+          </Dialog.Portal>
+        </Dialog.Root>
+        <StyledButton
+          type={"save"}
+          onClick={() => {
+            router.push("https://github.com/neeoll/web3-todo-list");
+          }}
+        >
+          Repository
+        </StyledButton>
+      </StyledActions>
+      <StyledText className={"contents"}>
+        *Switch to Goerli Testnet before proceeding*
+      </StyledText>
+      <StyledText className={"footer"}>
+        Mainnet Address for Donations:
+        0xca438cFfb2B65ca5ffC6EeA5319728da73000a29
+      </StyledText>
     </StyledCard>
   );
 }
@@ -81,7 +94,7 @@ const StyledOverlay = styled(Dialog.Overlay, {
 });
 
 const StyledDialogContent = styled(Dialog.Content, {
-  minWidth: 300,
+  width: 400,
   background: "#191919",
   color: "#fff",
   padding: 30,
