@@ -10,7 +10,9 @@ import {
   StyledText,
 } from "../Primitives";
 import DialogModal from "../components/DialogModal";
-import { styled } from "@stitches/react";
+import { keyframes, styled } from "@stitches/react";
+import { slateDark } from "@radix-ui/colors";
+import { Cross2Icon } from "@radix-ui/react-icons";
 
 export default function Home() {
   const router = useRouter();
@@ -54,7 +56,9 @@ export default function Home() {
                 <DialogModal select={connectWalletHandler} />
                 <Dialog.Close asChild>
                   <StyledActions>
-                    <StyledButton type={"cancel"}>Close</StyledButton>
+                    <IconButton type={"icon"}>
+                      <Cross2Icon height={20} width={20} />
+                    </IconButton>
                   </StyledActions>
                 </Dialog.Close>
               </StyledDialogContent>
@@ -73,10 +77,6 @@ export default function Home() {
       <StyledText className={"contents"}>
         *Switch to Goerli Testnet before proceeding*
       </StyledText>
-      <StyledText className={"footer"}>
-        Mainnet Address for Donations:
-        0xca438cFfb2B65ca5ffC6EeA5319728da73000a29
-      </StyledText>
     </StyledCard>
   );
 }
@@ -93,10 +93,22 @@ const StyledOverlay = styled(Dialog.Overlay, {
   overflowY: "auto",
 });
 
+const contentShow = keyframes({
+  "0%": { opacity: 0, transform: "scale(.96)" },
+  "100%": { opacity: 1, transform: "scale(1)" },
+});
+
 const StyledDialogContent = styled(Dialog.Content, {
   width: 400,
-  background: "#191919",
+  background: slateDark.slate5,
   color: "#fff",
   padding: 30,
   borderRadius: 4,
+  animation: `${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+});
+
+const IconButton = styled(StyledButton, {
+  position: "absolute",
+  top: 5,
+  right: 0,
 });

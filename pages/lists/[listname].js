@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { ethers, utils } from "ethers";
+import Main from "../../artifacts/contracts/Main.sol/Main.json";
 import TodoList from "../../artifacts/contracts/TodoList.sol/TodoList.json";
 import Task from "../../components/Task";
 import TextInput from "../../components/TextInput";
+import Tooltip from "../../components/Tooltip";
 import {
   StyledCard,
   StyledForm,
@@ -11,11 +13,12 @@ import {
   StyledDiv,
   StyledText,
 } from "../../Primitives";
-import { violet, mauve } from "@radix-ui/colors";
+import { violet, slateDark } from "@radix-ui/colors";
 import { styled } from "@stitches/react";
 import * as Tabs from "@radix-ui/react-tabs";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../../providerOptions";
+import { contractAddress } from "../../config";
 
 export function getServerSideProps(context) {
   return {
@@ -30,6 +33,7 @@ export default function Todo({ data }) {
   const [permissions, updatePermissions] = useState({});
   const [changesMade, toggleChangesMade] = useState(false);
   const [costEstimate, updateEstimate] = useState();
+  const [listSaved, setSaved] = useState();
 
   useEffect(() => {
     const initialContractLoad = async () => {
@@ -42,8 +46,8 @@ export default function Todo({ data }) {
         window.sessionStorage.getItem("network")
       );
       const provider = new ethers.providers.Web3Provider(library);
-      const contract = new ethers.Contract(data, TodoList.abi, provider);
-      const contractData = await contract.getData();
+      const listContract = new ethers.Contract(data, TodoList.abi, provider);
+      const contractData = await listContract.getData();
       const _tasks = [];
 
       for (let i = 0; i < contractData[0].length; i++) {
@@ -58,13 +62,24 @@ export default function Todo({ data }) {
 
       updateTasks(_tasks);
 
-      const hasAccess = await contract.getWriteStatus({
+      const hasAccess = await listContract.getWriteStatus({
         from: window.sessionStorage.getItem("userAddress"),
       });
-      const isOwner = await contract.getOwnershipStatus({
+      const isOwner = await listContract.getOwnershipStatus({
         from: window.sessionStorage.getItem("userAddress"),
       });
       updatePermissions({ writeAccess: hasAccess, ownerStatus: isOwner });
+
+      const mainContract = new ethers.Contract(
+        contractAddress,
+        Main.abi,
+        provider
+      );
+      const saved = await mainContract.hasListSaved(data, {
+        from: window.sessionStorage.getItem("userAddress"),
+      });
+
+      setSaved(saved);
     };
     initialContractLoad();
   }, [data]);
@@ -114,22 +129,27 @@ export default function Todo({ data }) {
     if (!changesMade) toggleChangesMade(true);
   };
 
-  const modifyWriteAccess = async (address) => {
+  const modifyWriteAccess = async (e, address) => {
+    console.log(address);
     if (typeof window.ethereum == "undefined") return;
-    const web3modal = new Web3Modal({
-      network: "localhost",
-      cacheProvider: true,
-      providerOptions,
-    });
-    const library = await web3modal.connectTo(
-      window.sessionStorage.getItem("network")
-    );
-    const provider = new ethers.providers.Web3Provider(library);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(data, TodoList.abi, signer);
-    await contract.grantWriteAccess(address, {
-      from: window.sessionStorage.getItem("userAddress"),
-    });
+    try {
+      const web3modal = new Web3Modal({
+        network: "localhost",
+        cacheProvider: true,
+        providerOptions,
+      });
+      const library = await web3modal.connectTo(
+        window.sessionStorage.getItem("network")
+      );
+      const provider = new ethers.providers.Web3Provider(library);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(data, TodoList.abi, signer);
+      await contract.grantWriteAccess(address, {
+        from: window.sessionStorage.getItem("userAddress"),
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const saveChanges = async () => {
@@ -190,13 +210,9 @@ export default function Todo({ data }) {
     const index = tasks.findIndex((item) => {
       return item.id == taskId;
     });
-    const copy = [...tasks];
-    copy[index].completed = !copy[index].completed;
-    copy[index].changed = false;
 
-    if (copy[index].new == true) {
-      copy.splice(index, 1);
-    }
+    const copy = [...tasks];
+    copy.splice(index, 1);
 
     updateTasks(copy);
     toggleChangesMade(checkChanges(copy));
@@ -246,9 +262,16 @@ export default function Todo({ data }) {
           New Task
         </TextInput>
         {permissions.ownerStatus == true && (
-          <TextInput submit={modifyWriteAccess} maxLength={50} page={"list"}>
-            Address to Grant Write Access
-          </TextInput>
+          <>
+            <TextInput submit={modifyWriteAccess} maxLength={50} page={"list"}>
+              Address to Grant Write Access
+            </TextInput>
+            <Tooltip
+              text={
+                "Granting someone write access will allow them to modify this list, proceed with caution."
+              }
+            />
+          </>
         )}
       </StyledForm>
       <StyledDiv className={"contents"}>
@@ -301,7 +324,7 @@ export default function Todo({ data }) {
           </StyledButton>
         </StyledActions>
       )}
-      {permissions.writeAccess === false && (
+      {listSaved === false && (
         <StyledActions className={"actions"}>
           <StyledButton type={"save"} ignoreBlock={true} onClick={addList}>
             Save this list
@@ -326,13 +349,13 @@ const StyledTabs = styled(Tabs.Root, {
 const StyledList = styled(Tabs.List, {
   flexShrink: 0,
   display: "flex",
-  borderBottom: `1px solid #393939`,
+  borderBottom: `1px solid ${slateDark.slate9}`,
 });
 
 const StyledTrigger = styled(Tabs.Trigger, {
   all: "unset",
   fontFamily: "inherit",
-  backgroundColor: "#191919",
+  backgroundColor: slateDark.slate1,
   padding: "0 20px",
   height: 45,
   flex: 1,
@@ -341,7 +364,6 @@ const StyledTrigger = styled(Tabs.Trigger, {
   justifyContent: "center",
   fontSize: 15,
   lineHeight: 1,
-  color: mauve.mauve11,
   userSelect: "none",
   "&:first-child": { borderTopLeftRadius: 6 },
   "&:last-child": { borderTopRightRadius: 6 },
@@ -374,10 +396,12 @@ const StyledTrigger = styled(Tabs.Trigger, {
 });
 
 const StyledTabsContent = styled(Tabs.Content, {
+  maxHeight: 350,
+  overflowY: "auto",
   listStyle: "none",
   flexGrow: 1,
   padding: 20,
-  backgroundColor: "#191919",
+  backgroundColor: slateDark.slate1,
   borderBottomLeftRadius: 6,
   borderBottomRightRadius: 6,
   outline: "none",

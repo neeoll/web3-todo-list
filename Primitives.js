@@ -1,4 +1,5 @@
 import { styled } from "@stitches/react";
+import { slateDark } from "@radix-ui/colors";
 
 export const StyledDiv = styled("div", {
   variants: {
@@ -7,7 +8,10 @@ export const StyledDiv = styled("div", {
         gridArea: "header",
       },
       footer: {
+        display: "flex",
+        flexDirection: "column",
         gridArea: "footer",
+        alignItems: "center",
       },
       lists: {
         gridArea: "lists",
@@ -25,7 +29,7 @@ export const StyledCard = styled(StyledDiv, {
   margin: 20,
   border: "none",
   color: "#fff",
-  backgroundColor: "#191919",
+  backgroundColor: slateDark.slate3,
   borderRadius: 10,
   display: "grid",
   variants: {
@@ -37,7 +41,6 @@ export const StyledCard = styled(StyledDiv, {
         gridTemplateAreas: `
         'header'
         'contents'
-        'footer'
         `,
       },
       lists: {
@@ -46,6 +49,7 @@ export const StyledCard = styled(StyledDiv, {
         gridTemplateAreas: `
         'header header header form form form'
         'lists lists lists contents contents contents'
+        'footer footer footer footer footer footer'
         `,
       },
       list: {
@@ -68,27 +72,39 @@ export const StyledCard = styled(StyledDiv, {
 });
 
 export const StyledActions = styled(StyledDiv, {
-  backgroundColor: "#191919",
-  padding: 10,
+  backgroundColor: "transparent",
+  paddingTop: 10,
+  paddingBottom: 10,
   borderRadius: 5,
   display: "flex",
+  alignItems: "center",
   justifyContent: "center",
+  gap: 10,
 });
 
 export const StyledCardList = styled(StyledDiv, {
   listStyle: "none",
-  flexGrow: 1,
   padding: 10,
-  backgroundColor: "#191919",
+  backgroundColor: "transparent",
   borderRadius: 5,
   outline: "none",
+  display: "flex",
+  flexDirection: "column",
+  variants: {
+    type: {
+      list: {
+        maxHeight: 250,
+        overflowY: "auto",
+      },
+    },
+  },
 });
 
 export const StyledCardItem = styled(StyledDiv, {
   padding: 15,
   marginTop: 10,
   marginBottom: 10,
-  backgroundColor: "#292929",
+  backgroundColor: slateDark.slate2,
   color: "#fff",
   borderRadius: 5,
   overflowY: "auto",
@@ -96,16 +112,30 @@ export const StyledCardItem = styled(StyledDiv, {
     type: {
       list: {
         display: "flex",
+        alignItems: "center",
+        gap: 10,
         justifyContent: "flex-start",
         "&:hover": {
           cursor: "pointer",
-          backgroundColor: "#222",
+          backgroundColor: slateDark.slate1,
         },
       },
+      listContent: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        gap: 4,
+        maxHeight: 250,
+        overflowY: "auto",
+        scrollBehavior: "smooth",
+      },
       task: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
         "&:hover": {
           cursor: "pointer",
-          backgroundColor: "#222",
+          backgroundColor: slateDark.slate3,
         },
       },
     },
@@ -113,9 +143,11 @@ export const StyledCardItem = styled(StyledDiv, {
 });
 
 export const StyledForm = styled("form", {
-  backgroundColor: "#191919",
+  backgroundColor: "transparent",
   display: "flex",
+  alignItems: "center",
   justifyContent: "space-evenly",
+  gap: 15,
   padding: 10,
   borderRadius: 5,
   variants: {
@@ -128,9 +160,8 @@ export const StyledForm = styled("form", {
 });
 
 export const StyledButton = styled("button", {
-  height: "auto",
-  width: "auto",
-  marginRight: 10,
+  height: "fit-content",
+  width: "fit-content",
   paddingTop: 10,
   paddingBottom: 10,
   paddingLeft: 20,
@@ -148,6 +179,10 @@ export const StyledButton = styled("button", {
       cancel: {
         backgroundColor: "#F71919",
         "&:hover": { backgroundColor: "#c81414" },
+      },
+      icon: {
+        backgroundColor: "transparent",
+        paddingLeft: 0,
       },
     },
     ignoreBlock: {

@@ -2,6 +2,7 @@ import Metamask from "../public/metamask.svg";
 import WalletConnect from "../public/walletconnect.svg";
 import Coinbase from "../public/coinbase.svg";
 import { styled } from "@stitches/react";
+import { slateDark } from "@radix-ui/colors";
 
 const DialogModal = ({ select }) => {
   return (
@@ -71,7 +72,7 @@ const StyledGridItem = styled("div", {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  backgroundColor: "#191919",
+  backgroundColor: slateDark.slate5,
   variants: {
     position: {
       one: { gridRow: 1, gridColumn: 1, marginBottom: 5 },
@@ -81,7 +82,7 @@ const StyledGridItem = styled("div", {
   },
   "&:hover": {
     cursor: "pointer",
-    backgroundColor: "#222",
+    backgroundColor: slateDark.slate3,
   },
 });
 

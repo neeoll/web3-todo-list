@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\Noel\\Desktop\\web3-todo-list\\contracts\\Main.sol": {
-      "lastModificationDate": 1654794526383,
-      "contentHash": "78241fd26a01773180afdf0be57546df",
+      "lastModificationDate": 1656355030025,
+      "contentHash": "c48ae04fd3b1ffe2de0d372bd909bb3b",
       "sourceName": "contracts/Main.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -39,8 +39,8 @@
       ]
     },
     "C:\\Users\\Noel\\Desktop\\web3-todo-list\\contracts\\TodoList.sol": {
-      "lastModificationDate": 1654794507067,
-      "contentHash": "a58e29f929ec0cf51c82535746cbbb8a",
+      "lastModificationDate": 1656356044834,
+      "contentHash": "8b40e0512b4c0aebaa51aa34432f2bb5",
       "sourceName": "contracts/TodoList.sol",
       "solcConfig": {
         "version": "0.8.9",

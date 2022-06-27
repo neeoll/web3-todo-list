@@ -3,6 +3,7 @@ import Head from "next/head";
 import "bootstrap/dist/css/bootstrap.css";
 import "jquery";
 import { styled } from "@stitches/react";
+import { slateDark } from "@radix-ui/colors";
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -18,7 +19,7 @@ function MyApp({ Component, pageProps }) {
 }
 
 const Root = styled("div", {
-  backgroundColor: "#292929",
+  backgroundColor: slateDark.slate2,
   display: "flex",
   justifyContent: "center",
 });

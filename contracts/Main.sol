@@ -10,8 +10,8 @@ contract Main {
 
     mapping(address => TodoList[]) lists;
 
-    function createList(bytes32 title) public {
-        TodoList list = new TodoList(title, msg.sender, lists[msg.sender].length);
+    function createList(bytes32 title, bool isPrivate) public {
+        TodoList list = new TodoList(title, msg.sender, lists[msg.sender].length, isPrivate);
         lists[msg.sender].push(list);
 
         emit Create(address(list));
@@ -37,6 +37,16 @@ contract Main {
         //- [arrayName].pop()
 
         emit Remove();
+    }
+
+    function hasListSaved(address listAddr) public view returns(bool) {
+        for (uint i = 0; i < lists[msg.sender].length; i++) {
+            if (lists[msg.sender][i] == TodoList(listAddr)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function getLists() public view returns(TodoList[] memory) {

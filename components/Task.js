@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { DividerHorizontalIcon, CheckIcon } from "@radix-ui/react-icons";
+import {
+  DividerHorizontalIcon,
+  CheckIcon,
+  Cross2Icon,
+} from "@radix-ui/react-icons";
 import { StyledCardItem, StyledButton } from "../Primitives";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { styled } from "@stitches/react";
@@ -23,13 +27,14 @@ const Task = ({ data, toggle, revert }) => {
   const toggleCompletion = () => {
     toggle(propsData.id, !propsData.completed);
   };
+
   const revertTask = () => {
     revert(propsData.id);
   };
 
   return (
-    <StyledCardItem type={"task"} onClick={toggleCompletion}>
-      <StyledCheckbox checked={checked}>
+    <StyledCardItem type={"task"}>
+      <StyledCheckbox checked={checked} onClick={toggleCompletion}>
         <StyledIndicator>
           {checked === "indeterminate" && <DividerHorizontalIcon />}
           {checked === true && <CheckIcon />}
@@ -38,9 +43,9 @@ const Task = ({ data, toggle, revert }) => {
       <StyledContent completed={propsData.completed}>
         {propsData.content}
       </StyledContent>
-      {propsData.changed === true && (
-        <StyledButton type={"cancel"} onClick={revertTask}>
-          Revert
+      {propsData.new === true && (
+        <StyledButton type={"icon"} onClick={revertTask}>
+          <Cross2Icon width={20} height={20} />
         </StyledButton>
       )}
     </StyledCardItem>
@@ -50,7 +55,6 @@ const Task = ({ data, toggle, revert }) => {
 const StyledCheckbox = styled(Checkbox.Root, {
   display: "inline-block",
   verticalAlign: "middle",
-  marginRight: "10px",
   width: "auto",
   height: "auto",
   border: "none",
@@ -62,7 +66,6 @@ const StyledIndicator = styled(Checkbox.Indicator, {
 });
 
 const StyledContent = styled("span", {
-  marginRight: 10,
   variants: {
     completed: {
       true: {

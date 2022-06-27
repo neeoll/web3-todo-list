@@ -3,10 +3,12 @@ import { ethers } from "ethers";
 import TodoList from "../artifacts/contracts/TodoList.sol/TodoList.json";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../providerOptions";
-import { StyledButton, StyledCardItem } from "../Primitives";
+import { StyledButton, StyledCardItem, StyledText } from "../Primitives";
+import { Pencil2Icon, LockClosedIcon } from "@radix-ui/react-icons";
 
 const List = (props) => {
   const [listTitle, setTitle] = useState();
+  const [privacy, setPrivacy] = useState();
 
   useEffect(() => {
     const getData = async () => {
@@ -25,15 +27,13 @@ const List = (props) => {
         provider
       );
       const title = ethers.utils.parseBytes32String(await contract.getTitle());
+      const isPrivate = await contract.getPrivacyStatus();
 
       setTitle(title);
+      setPrivacy(isPrivate);
     };
     getData();
   }, [props]);
-
-  const route = () => {
-    props.route(listTitle, props.address);
-  };
 
   const setActive = () => {
     props.setActive(props.address);
@@ -41,9 +41,8 @@ const List = (props) => {
 
   return (
     <StyledCardItem type={"list"} onClick={setActive}>
-      <a className="nav-link" onClick={route}>
-        {listTitle}
-      </a>
+      {privacy == true && <LockClosedIcon width={20} height={20} />}
+      <StyledText>{listTitle}</StyledText>
     </StyledCardItem>
   );
 };

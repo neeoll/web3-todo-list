@@ -3,7 +3,9 @@ import { ethers } from "ethers";
 import TodoList from "../artifacts/contracts/TodoList.sol/TodoList.json";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../providerOptions";
-import { StyledCardItem } from "../Primitives";
+import { StyledButton, StyledCardItem } from "../Primitives";
+import { Pencil2Icon } from "@radix-ui/react-icons";
+import { styled } from "@stitches/react";
 
 const ListContents = (props) => {
   const [listData, setListData] = useState([]);
@@ -36,22 +38,22 @@ const ListContents = (props) => {
         });
       }
 
-      if (tasks.length > 2) {
-        tasks = tasks.splice(1);
-        tasks.push({
-          id: 100,
-          contents: "...",
-          completed: false,
-        });
-      }
-
       setListData(tasks);
     };
     getData();
   }, [props]);
 
+  const route = (e) => {
+    props.route(e, props.address);
+  };
+
   return (
-    <StyledCardItem>
+    <StyledCardItem type={"listContent"}>
+      <Header>
+        <IconButton type={"icon"} onClick={route}>
+          <Pencil2Icon width={20} height={20} />
+        </IconButton>
+      </Header>
       {listData.length == 0
         ? "No active tasks"
         : listData.map((item) => (
@@ -62,5 +64,14 @@ const ListContents = (props) => {
     </StyledCardItem>
   );
 };
+
+const Header = styled("div", {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 10,
+});
+
+const IconButton = styled(StyledButton, {});
 
 export default ListContents;
