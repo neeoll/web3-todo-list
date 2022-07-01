@@ -7,15 +7,45 @@ import {
   StyledCard,
   StyledButton,
   StyledActions,
-  StyledText,
-} from "../Primitives";
+  StyledText
+} from "../components/primitives/Primitives";
+import { StyledOverlay, StyledContent, IconButton } from '../components/primitives/Home'
 import DialogModal from "../components/DialogModal";
-import { keyframes, styled } from "@stitches/react";
-import { slateDark } from "@radix-ui/colors";
 import { Cross2Icon } from "@radix-ui/react-icons";
+import { useEffect } from 'react'
 
 export default function Home() {
   const router = useRouter();
+
+  useEffect(() => {
+    const checkConnected = async () => {
+      if (window.localStorage.getItem('userAddress') != null) {
+        console.log(window.localStorage.getItem('userAddress'))
+        console.log(window.localStorage.getItem('network'))
+        const web3modal = new Web3Modal({
+          cacheProvider: true,
+          providerOptions,
+        });
+        const library = await web3modal.connectTo(window.localStorage.getItem('network'));
+        const provider = new ethers.providers.Web3Provider(library);
+        const accounts = await provider.listAccounts();
+
+        if (accounts) {
+          router.push(
+            {
+              pathname: "/lists",
+              query: { address: accounts[0] },
+            },
+            "/lists"
+          );
+        }
+      } else {
+        return
+      }
+    }
+
+    checkConnected()
+  }, [])
 
   const connectWalletHandler = async (_network) => {
     try {
@@ -28,8 +58,8 @@ export default function Home() {
       const accounts = await provider.listAccounts();
 
       if (accounts) {
-        window.sessionStorage.setItem("userAddress", accounts[0]);
-        window.sessionStorage.setItem("network", _network);
+        window.localStorage.setItem("userAddress", accounts[0]);
+        window.localStorage.setItem("network", _network);
         router.push(
           {
             pathname: "/lists",
@@ -52,7 +82,7 @@ export default function Home() {
           </Dialog.Trigger>
           <Dialog.Portal>
             <StyledOverlay>
-              <StyledDialogContent>
+              <StyledContent>
                 <DialogModal select={connectWalletHandler} />
                 <Dialog.Close asChild>
                   <StyledActions>
@@ -61,7 +91,7 @@ export default function Home() {
                     </IconButton>
                   </StyledActions>
                 </Dialog.Close>
-              </StyledDialogContent>
+              </StyledContent>
             </StyledOverlay>
           </Dialog.Portal>
         </Dialog.Root>
@@ -80,35 +110,3 @@ export default function Home() {
     </StyledCard>
   );
 }
-
-const StyledOverlay = styled(Dialog.Overlay, {
-  background: "rgba(0 0 0 / 0.5)",
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  display: "grid",
-  placeItems: "center",
-  overflowY: "auto",
-});
-
-const contentShow = keyframes({
-  "0%": { opacity: 0, transform: "scale(.96)" },
-  "100%": { opacity: 1, transform: "scale(1)" },
-});
-
-const StyledDialogContent = styled(Dialog.Content, {
-  width: 400,
-  background: slateDark.slate5,
-  color: "#fff",
-  padding: 30,
-  borderRadius: 4,
-  animation: `${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-});
-
-const IconButton = styled(StyledButton, {
-  position: "absolute",
-  top: 5,
-  right: 0,
-});

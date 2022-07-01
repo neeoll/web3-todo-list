@@ -15,13 +15,23 @@ import {
   StyledForm,
   StyledText,
   StyledDiv,
-} from "../../Primitives";
+} from "../../components/primitives/Primitives";
+import {
+  StyledTrigger,
+  StyledContent,
+  StyledViewport,
+  StyledItem,
+  StyledItemIndicator,
+  StyledAlertOverlay,
+  StyledAlertContent,
+  StyledTitle,
+  StyledDescription,
+} from "../../components/primitives/Lists";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../../providerOptions";
 import { ChevronDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import { styled } from "@stitches/react";
-import { slateDark } from "@radix-ui/colors";
 import * as Select from "@radix-ui/react-select";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import Toggle from "../../components/Toggle";
 
 export default function Lists() {
@@ -41,12 +51,12 @@ export default function Lists() {
         providerOptions,
       });
       const library = await web3modal.connectTo(
-        window.sessionStorage.getItem("network")
+        window.localStorage.getItem("network")
       );
       const provider = new ethers.providers.Web3Provider(library);
       const contract = new ethers.Contract(contractAddress, Main.abi, provider);
       const contractData = await contract.getLists({
-        from: window.sessionStorage.getItem("userAddress"),
+        from: window.localStorage.getItem("userAddress"),
       });
 
       switch (contractData.length == 0) {
@@ -76,7 +86,7 @@ export default function Lists() {
       ethers.utils.formatBytes32String(name),
       isPrivate,
       {
-        from: window.sessionStorage.getItem("userAddress"),
+        from: window.localStorage.getItem("userAddress"),
       }
     );
 
@@ -99,7 +109,7 @@ export default function Lists() {
     const contract = new ethers.Contract(_address, TodoList.abi, provider);
     const isPrivate = await contract.getPrivacyStatus();
     const writeAccess = await contract.getWriteStatus({
-      from: window.sessionStorage.getItem("userAddress"),
+      from: window.localStorage.getItem("userAddress"),
     });
 
     if (isPrivate == true && writeAccess == false) {
@@ -129,7 +139,7 @@ export default function Lists() {
         providerOptions,
       });
       const library = await web3modal.connectTo(
-        window.sessionStorage.getItem("network")
+        window.localStorage.getItem("network")
       );
       const provider = new ethers.providers.Web3Provider(library);
       const accounts = await provider.listAccounts();
@@ -137,7 +147,7 @@ export default function Lists() {
       if (accounts) {
         const params = [
           {
-            from: window.sessionStorage.getItem("userAddress"),
+            from: window.localStorage.getItem("userAddress"),
             to: "0xca438cFfb2B65ca5ffC6EeA5319728da73000a29",
             value: ethers.utils
               .parseUnits(amount, denomination.toLowerCase())
@@ -150,6 +160,11 @@ export default function Lists() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const signout = () => {
+    window.localStorage.clear();
+    router.push("/");
   };
 
   const togglePrivacy = () => {
@@ -257,61 +272,31 @@ export default function Lists() {
             </StyledContent>
           </Select.Root>
         </StyledActions>
+        <AlertDialog.Root>
+          <AlertDialog.Trigger asChild>
+            <StyledButton type={"cancel"}>Sign out</StyledButton>
+          </AlertDialog.Trigger>
+          <AlertDialog.Portal>
+            <StyledAlertOverlay />
+            <StyledAlertContent>
+              <StyledTitle>Are you sure you want to sign out?</StyledTitle>
+              <StyledDescription>
+                You will need to reauthenticate if you choose to do so.
+              </StyledDescription>
+              <StyledActions>
+                <AlertDialog.Cancel asChild>
+                  <StyledButton type={"cancel"}>Cancel</StyledButton>
+                </AlertDialog.Cancel>
+                <AlertDialog.Action asChild>
+                  <StyledButton type={"save"} onClick={signout}>
+                    Confirm
+                  </StyledButton>
+                </AlertDialog.Action>
+              </StyledActions>
+            </StyledAlertContent>
+          </AlertDialog.Portal>
+        </AlertDialog.Root>
       </StyledDiv>
     </StyledCard>
   );
 }
-
-const StyledTrigger = styled(Select.Trigger, {
-  all: "unset",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  borderRadius: 5,
-  paddingLeft: 20,
-  paddingRight: 20,
-  paddingTop: 10,
-  paddingBottom: 10,
-  gap: 5,
-  height: "fit-content",
-  backgroundColor: slateDark.slate2,
-  color: "#fff",
-  "&:hover": { backgroundColor: slateDark.slate1 },
-});
-
-const StyledContent = styled(Select.Content, {
-  overflow: "hidden",
-  backgroundColor: slateDark.slate1,
-  borderRadius: 5,
-});
-
-const StyledViewport = styled(Select.Viewport, {
-  padding: 5,
-});
-
-const StyledItem = styled(Select.Item, {
-  all: "unset",
-  color: "#fff",
-  borderRadius: 5,
-  display: "flex",
-  alignItems: "center",
-  height: "auto",
-  paddingLeft: 30,
-  paddingRight: 30,
-  position: "relative",
-  userSelect: "none",
-
-  "&:focus": {
-    backgroundColor: slateDark.slate2,
-    color: "#fff",
-  },
-});
-
-const StyledItemIndicator = styled(Select.ItemIndicator, {
-  position: "absolute",
-  left: 0,
-  width: 25,
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-});

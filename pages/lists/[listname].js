@@ -12,10 +12,8 @@ import {
   StyledButton,
   StyledDiv,
   StyledText,
-} from "../../Primitives";
-import { violet, slateDark } from "@radix-ui/colors";
-import { styled } from "@stitches/react";
-import * as Tabs from "@radix-ui/react-tabs";
+} from "../../components/primitives/Primitives";
+import { StyledTabs, StyledList, StyledTrigger, StyledTabsContent } from "../../components/primitives/List";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../../providerOptions";
 import { contractAddress } from "../../config";
@@ -37,13 +35,14 @@ export default function Todo({ data }) {
 
   useEffect(() => {
     const initialContractLoad = async () => {
+      window.sessionStorage.setItem('contractAddress', data)
       const web3modal = new Web3Modal({
         network: "localhost",
         cacheProvider: true,
         providerOptions,
       });
       const library = await web3modal.connectTo(
-        window.sessionStorage.getItem("network")
+        window.localStorage.getItem("network")
       );
       const provider = new ethers.providers.Web3Provider(library);
       const listContract = new ethers.Contract(data, TodoList.abi, provider);
@@ -63,10 +62,10 @@ export default function Todo({ data }) {
       updateTasks(_tasks);
 
       const hasAccess = await listContract.getWriteStatus({
-        from: window.sessionStorage.getItem("userAddress"),
+        from: window.localStorage.getItem("userAddress"),
       });
       const isOwner = await listContract.getOwnershipStatus({
-        from: window.sessionStorage.getItem("userAddress"),
+        from: window.localStorage.getItem("userAddress"),
       });
       updatePermissions({ writeAccess: hasAccess, ownerStatus: isOwner });
 
@@ -76,7 +75,7 @@ export default function Todo({ data }) {
         provider
       );
       const saved = await mainContract.hasListSaved(data, {
-        from: window.sessionStorage.getItem("userAddress"),
+        from: window.localStorage.getItem("userAddress"),
       });
 
       setSaved(saved);
@@ -92,7 +91,7 @@ export default function Todo({ data }) {
         providerOptions,
       });
       const library = await web3modal.connectTo(
-        window.sessionStorage.getItem("network")
+        window.localStorage.getItem("network")
       );
       const provider = new ethers.providers.Web3Provider(library);
       const feeData = await provider.getFeeData();
@@ -139,13 +138,13 @@ export default function Todo({ data }) {
         providerOptions,
       });
       const library = await web3modal.connectTo(
-        window.sessionStorage.getItem("network")
+        window.localStorage.getItem("network")
       );
       const provider = new ethers.providers.Web3Provider(library);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(data, TodoList.abi, signer);
       await contract.grantWriteAccess(address, {
-        from: window.sessionStorage.getItem("userAddress"),
+        from: window.localStorage.getItem("userAddress"),
       });
     } catch (error) {
       console.log(error);
@@ -172,13 +171,13 @@ export default function Todo({ data }) {
       providerOptions,
     });
     const library = await web3modal.connectTo(
-      window.sessionStorage.getItem("network")
+      window.localStorage.getItem("network")
     );
     const provider = new ethers.providers.Web3Provider(library);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(data, TodoList.abi, signer);
     await contract.saveChanges(changedIds, changedContents, changedStatuses, {
-      from: window.sessionStorage.getItem("userAddress"),
+      from: window.localStorage.getItem("userAddress"),
     });
 
     contract.once("ChangesSaved", async (event) => {
@@ -226,13 +225,13 @@ export default function Todo({ data }) {
       providerOptions,
     });
     const library = await web3modal.connectTo(
-      window.sessionStorage.getItem("network")
+      window.localStorage.getItem("network")
     );
     const provider = new ethers.providers.Web3Provider(library);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, Main.abi, signer);
     await contract.addList(data, {
-      from: window.sessionStorage.getItem("userAddress"),
+      from: window.localStorage.getItem("userAddress"),
     });
 
     contract.once("Add", async (event) => {
@@ -338,71 +337,3 @@ export default function Todo({ data }) {
     </StyledCard>
   );
 }
-
-const StyledTabs = styled(Tabs.Root, {
-  display: "flex",
-  flexDirection: "column",
-  width: "auto",
-  marginBottom: 10,
-});
-
-const StyledList = styled(Tabs.List, {
-  flexShrink: 0,
-  display: "flex",
-  borderBottom: `1px solid ${slateDark.slate9}`,
-});
-
-const StyledTrigger = styled(Tabs.Trigger, {
-  all: "unset",
-  fontFamily: "inherit",
-  backgroundColor: slateDark.slate1,
-  padding: "0 20px",
-  height: 45,
-  flex: 1,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: 15,
-  lineHeight: 1,
-  userSelect: "none",
-  "&:first-child": { borderTopLeftRadius: 6 },
-  "&:last-child": { borderTopRightRadius: 6 },
-  "&:hover": { color: violet.violet11 },
-  variants: {
-    id: {
-      all: {
-        "&:hover": { color: violet.violet11 },
-        '&[data-state="active"]': {
-          color: violet.violet11,
-          boxShadow: "inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor",
-        },
-      },
-      active: {
-        "&:hover": { color: "#F71919" },
-        '&[data-state="active"]': {
-          color: "#F71919",
-          boxShadow: "inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor",
-        },
-      },
-      completed: {
-        "&:hover": { color: "#0075FF" },
-        '&[data-state="active"]': {
-          color: "#0075FF",
-          boxShadow: "inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor",
-        },
-      },
-    },
-  },
-});
-
-const StyledTabsContent = styled(Tabs.Content, {
-  maxHeight: 350,
-  overflowY: "auto",
-  listStyle: "none",
-  flexGrow: 1,
-  padding: 20,
-  backgroundColor: slateDark.slate1,
-  borderBottomLeftRadius: 6,
-  borderBottomRightRadius: 6,
-  outline: "none",
-});

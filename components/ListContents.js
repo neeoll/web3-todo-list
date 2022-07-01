@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import TodoList from "../artifacts/contracts/TodoList.sol/TodoList.json";
 import Web3Modal from "web3modal";
 import { providerOptions } from "../providerOptions";
-import { StyledButton, StyledCardItem } from "../Primitives";
+import { StyledButton, StyledCardItem } from "./primitives/Primitives";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import { styled } from "@stitches/react";
 
@@ -18,7 +18,7 @@ const ListContents = (props) => {
         providerOptions,
       });
       const connection = await web3modal.connectTo(
-        window.sessionStorage.getItem("network")
+        window.localStorage.getItem("network")
       );
       const provider = new ethers.providers.Web3Provider(connection);
       const contract = new ethers.Contract(
