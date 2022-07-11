@@ -4,7 +4,7 @@ import {
   CheckIcon,
   Cross2Icon,
 } from "@radix-ui/react-icons";
-import { StyledCardItem, StyledButton } from "./primitives/Primitives";
+import { StyledCardItem, StyledButton } from "./Primitives";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { styled } from "@stitches/react";
 import { violet } from "@radix-ui/colors";

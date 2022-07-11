@@ -1,58 +1,61 @@
-import { useState, useEffect } from "react";
-import { ethers, utils } from "ethers";
-import Main from "../../artifacts/contracts/Main.sol/Main.json";
-import TodoList from "../../artifacts/contracts/TodoList.sol/TodoList.json";
-import Task from "../../components/Task";
-import TextInput from "../../components/TextInput";
-import Tooltip from "../../components/Tooltip";
+import {useState, useEffect} from "react";
 import {
-  StyledCard,
+  StyledCard_List,
   StyledForm,
   StyledActions,
   StyledButton,
   StyledDiv,
   StyledText,
-} from "../../components/primitives/Primitives";
-import { StyledTabs, StyledList, StyledTrigger, StyledTabsContent } from "../../components/primitives/List";
-import Web3Modal from "web3modal";
-import { providerOptions } from "../../providerOptions";
-import { contractAddress } from "../../config";
+  LoadingPlaceholder,
+} from "../../components/Primitives";
+import {contractAddress} from "../../config";
+import Main from "../../artifacts/contracts/Main.sol/Main.json";
+import TodoList from "../../artifacts/contracts/TodoList.sol/TodoList.json";
+import TextInput from "../../components/TextInput";
+import Tooltip from "../../components/Tooltip";
+import Tabs from "../../components/Tabs";
+import {
+  connectToNetwork,
+  getProvider,
+  getContract,
+  parseBytes32String,
+  formatBytes32String,
+  formatUnits,
+} from "../../utils";
+import Loading from "../../components/Loading";
+import { keyframes, styled } from "@stitches/react";
 
-export function getServerSideProps(context) {
-  return {
-    props: {
-      data: context.query.address,
-    },
-  };
-}
-
-export default function Todo({ data }) {
+export default function Todo() {
   const [tasks, updateTasks] = useState([]);
   const [permissions, updatePermissions] = useState({});
   const [changesMade, toggleChangesMade] = useState(false);
   const [costEstimate, updateEstimate] = useState();
   const [listSaved, setSaved] = useState();
+  const [loading, setLoading] = useState(true);
+  const [processingTransaction, setProcessing] = useState(false);
+
+  const [listAddress, setListAddress] = useState();
+  const [network, setNetwork] = useState();
+  const [userAddress, setUserAddress] = useState();
 
   useEffect(() => {
     const initialContractLoad = async () => {
-      window.sessionStorage.setItem('contractAddress', data)
-      const web3modal = new Web3Modal({
-        network: "localhost",
-        cacheProvider: true,
-        providerOptions,
-      });
-      const library = await web3modal.connectTo(
+      const connection = await connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = new ethers.providers.Web3Provider(library);
-      const listContract = new ethers.Contract(data, TodoList.abi, provider);
+      const provider = await getProvider(connection);
+      const listContract = await getContract(
+        window.localStorage.getItem("contractAddress"),
+        TodoList.abi,
+        provider
+      );
       const contractData = await listContract.getData();
       const _tasks = [];
 
       for (let i = 0; i < contractData[0].length; i++) {
         _tasks.push({
           id: i,
-          content: ethers.utils.parseBytes32String(contractData[0][i]),
+          content: await parseBytes32String(contractData[0][i]),
           completed: contractData[1][i],
           new: false,
           changed: false,
@@ -67,36 +70,38 @@ export default function Todo({ data }) {
       const isOwner = await listContract.getOwnershipStatus({
         from: window.localStorage.getItem("userAddress"),
       });
-      updatePermissions({ writeAccess: hasAccess, ownerStatus: isOwner });
+      updatePermissions({writeAccess: hasAccess, ownerStatus: isOwner});
 
-      const mainContract = new ethers.Contract(
+      const mainContract = await getContract(
         contractAddress,
         Main.abi,
         provider
       );
-      const saved = await mainContract.hasListSaved(data, {
-        from: window.localStorage.getItem("userAddress"),
-      });
+      const saved = await mainContract.hasListSaved(
+        window.localStorage.getItem("contractAddress"),
+        {
+          from: window.localStorage.getItem("userAddress"),
+        }
+      );
 
+      setListAddress(window.localStorage.getItem("contractAddress"));
+      setNetwork(window.localStorage.getItem("network"));
+      setUserAddress(window.localStorage.getItem("userAddress"));
       setSaved(saved);
+      setLoading(false);
     };
     initialContractLoad();
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     const estimateGas = async () => {
-      const web3modal = new Web3Modal({
-        network: "localhost",
-        cacheProvider: true,
-        providerOptions,
-      });
-      const library = await web3modal.connectTo(
+      const connection = await connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = new ethers.providers.Web3Provider(library);
+      const provider = await getProvider(connection);
       const feeData = await provider.getFeeData();
       const costEstimate = feeData.maxFeePerGas * 204838;
-      const cost = utils.formatUnits(costEstimate, "ether");
+      const cost = await formatUnits(costEstimate, "ether");
 
       updateEstimate(cost);
     };
@@ -129,22 +134,15 @@ export default function Todo({ data }) {
   };
 
   const modifyWriteAccess = async (e, address) => {
-    console.log(address);
     if (typeof window.ethereum == "undefined") return;
     try {
-      const web3modal = new Web3Modal({
-        network: "localhost",
-        cacheProvider: true,
-        providerOptions,
-      });
-      const library = await web3modal.connectTo(
+      const connection = await connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = new ethers.providers.Web3Provider(library);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(data, TodoList.abi, signer);
+      const signer = (await getProvider(connection)).getSigner();
+      const contract = await getContract(listAddress, TodoList.abi, signer);
       await contract.grantWriteAccess(address, {
-        from: window.localStorage.getItem("userAddress"),
+        from: userAddress,
       });
     } catch (error) {
       console.log(error);
@@ -152,7 +150,6 @@ export default function Todo({ data }) {
   };
 
   const saveChanges = async () => {
-    if (typeof window.ethereum == "undefined") return;
     const changedIds = [];
     const changedContents = [];
     const changedStatuses = [];
@@ -160,27 +157,24 @@ export default function Todo({ data }) {
     tasks.forEach((item) => {
       if (item.changed == true) {
         changedIds.push(item.id);
-        changedContents.push(ethers.utils.formatBytes32String(item.content));
+        changedContents.push(formatBytes32String(item.content));
         changedStatuses.push(item.completed);
       }
     });
 
-    const web3modal = new Web3Modal({
-      network: "localhost",
-      cacheProvider: true,
-      providerOptions,
-    });
-    const library = await web3modal.connectTo(
+    const connection = await connectToNetwork(
       window.localStorage.getItem("network")
     );
-    const provider = new ethers.providers.Web3Provider(library);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(data, TodoList.abi, signer);
+    const signer = (await getProvider(connection)).getSigner();
+    const contract = await getContract(listAddress, TodoList.abi, signer);
     await contract.saveChanges(changedIds, changedContents, changedStatuses, {
-      from: window.localStorage.getItem("userAddress"),
+      from: userAddress,
     });
 
+    setProcessing(true);
+
     contract.once("ChangesSaved", async (event) => {
+      setProcessing(false);
       toggleChangesMade(false);
 
       const copy = [...tasks];
@@ -218,23 +212,19 @@ export default function Todo({ data }) {
   };
 
   const addList = async () => {
-    if (typeof window.ethereum == "undefined") return;
-    const web3modal = new Web3Modal({
-      network: "localhost",
-      cacheProvider: true,
-      providerOptions,
-    });
-    const library = await web3modal.connectTo(
+    const connection = await connectToNetwork(
       window.localStorage.getItem("network")
     );
-    const provider = new ethers.providers.Web3Provider(library);
-    const signer = provider.getSigner();
+    const signer = (await getProvider(connection)).getSigner();
     const contract = new ethers.Contract(contractAddress, Main.abi, signer);
-    await contract.addList(data, {
-      from: window.localStorage.getItem("userAddress"),
+    await contract.addList(listAddress, {
+      from: userAddress,
     });
 
+    setProcessing(true);
+
     contract.once("Add", async (event) => {
+      setProcessing(false);
       window.location.reload();
     });
   };
@@ -255,7 +245,10 @@ export default function Todo({ data }) {
   };
 
   return (
-    <StyledCard writeAccess={permissions.writeAccess} page={"list"}>
+    <StyledCard_List loading={loading} writeAccess={permissions.writeAccess}>
+      {processingTransaction == true && (
+        <Loading />
+      )}
       <StyledForm className={"form"}>
         <TextInput submit={addTask} maxLength={32} page={"list"}>
           New Task
@@ -273,55 +266,30 @@ export default function Todo({ data }) {
           </>
         )}
       </StyledForm>
-      <StyledDiv className={"contents"}>
-        <StyledTabs defaultValue="all">
-          <StyledList>
-            <StyledTrigger value="all" id={"all"}>
-              All
-            </StyledTrigger>
-            <StyledTrigger value="active" id={"active"}>
-              Active
-            </StyledTrigger>
-            <StyledTrigger value="completed" id={"completed"}>
-              Completed
-            </StyledTrigger>
-          </StyledList>
-          <StyledTabsContent value="all">
-            {tasks.map((item) => (
-              <li key={item.id}>
-                <Task data={item} toggle={toggle} revert={revert} />
-              </li>
-            ))}
-          </StyledTabsContent>
-          <StyledTabsContent value="active">
-            {tasks
-              .filter((item) => item.completed == false)
-              .map((item) => (
-                <li key={item.id}>
-                  <Task data={item} toggle={toggle} revert={revert} />
-                </li>
-              ))}
-          </StyledTabsContent>
-          <StyledTabsContent value="completed">
-            {tasks
-              .filter((item) => item.completed == true)
-              .map((item) => (
-                <li key={item.id}>
-                  <Task data={item} toggle={toggle} revert={revert} />
-                </li>
-              ))}
-          </StyledTabsContent>
-        </StyledTabs>
-      </StyledDiv>
+      {loading == false ? (
+        tasks.length == 0 ? (
+          <StyledDiv className={"contents"}>
+            <span>{"Add some todos to get started!"}</span>
+          </StyledDiv>
+        ) : (
+          <StyledDiv className={"contents"}>
+            <Tabs tasks={tasks} toggle={toggle} revert={revert} />
+          </StyledDiv>
+        )
+      ) : (
+        <StyledDiv className={"loading"}>
+          <LoadingPlaceholder />
+        </StyledDiv>
+      )}
       {changesMade == true && (
-        <StyledActions className={"actions"}>
+        <Actions className={"actions"}>
           <StyledButton type={"save"} onClick={saveChanges}>
             Save Changes
           </StyledButton>
           <StyledButton type={"cancel"} onClick={cancelChanges}>
             Cancel
           </StyledButton>
-        </StyledActions>
+        </Actions>
       )}
       {listSaved === false && (
         <StyledActions className={"actions"}>
@@ -331,9 +299,20 @@ export default function Todo({ data }) {
         </StyledActions>
       )}
       <StyledText className={"footer"}>
-        <p className="address">Address: {data}</p>
+        <p className="address">Address: {listAddress}</p>
         <p className="address">Max Transaction Fee: {costEstimate} Ether</p>
       </StyledText>
-    </StyledCard>
+    </StyledCard_List>
   );
 }
+
+const contentShow = keyframes({
+  "0%": { opacity: 0, transform: "translate(0%, -50%) scaleY(.96)" },
+  "100%": { opacity: 1, transform: "translate(0%, 0%) scaleY(1)" },
+});
+
+const Actions = styled(StyledActions, {
+  "@media (prefers-reduced-motion: no-preference)": {
+    animation: `${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+  },
+})

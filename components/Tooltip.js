@@ -1,7 +1,7 @@
 import * as HoverCard from "@radix-ui/react-hover-card";
 import { styled, keyframes } from "@stitches/react";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { slateDark } from "@radix-ui/colors";
+import { gray } from "@radix-ui/colors";
 
 const Tooltip = ({ text }) => {
   return (
@@ -41,8 +41,7 @@ const StyledContent = styled(HoverCard.Content, {
   borderRadius: 6,
   padding: 20,
   width: 300,
-  color: "#fff",
-  backgroundColor: slateDark.slate1,
+  backgroundColor: "#fff",
   boxShadow:
     "hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px",
   "@media (prefers-reduced-motion: no-preference)": {
@@ -60,7 +59,7 @@ const StyledContent = styled(HoverCard.Content, {
 });
 
 const StyledArrow = styled(HoverCard.Arrow, {
-  fill: slateDark.slate1,
+  fill: gray.gray1,
 });
 
 export default Tooltip;

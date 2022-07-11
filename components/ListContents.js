@@ -1,31 +1,26 @@
-import { useEffect, useState } from "react";
-import { ethers } from "ethers";
+import {useEffect, useState} from "react";
 import TodoList from "../artifacts/contracts/TodoList.sol/TodoList.json";
-import Web3Modal from "web3modal";
-import { providerOptions } from "../providerOptions";
-import { StyledButton, StyledCardItem } from "./primitives/Primitives";
-import { Pencil2Icon } from "@radix-ui/react-icons";
-import { styled } from "@stitches/react";
+import {StyledButton, StyledCardItem} from "./Primitives";
+import {Pencil2Icon} from "@radix-ui/react-icons";
+import {styled, keyframes} from "@stitches/react";
+import {
+  connectToNetwork,
+  getProvider,
+  getContract,
+  parseBytes32String,
+} from "../utils";
 
 const ListContents = (props) => {
   const [listData, setListData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getData = async () => {
-      const web3modal = new Web3Modal({
-        network: "localhost",
-        cacheProvider: true,
-        providerOptions,
-      });
-      const connection = await web3modal.connectTo(
+      const connection = await connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = new ethers.providers.Web3Provider(connection);
-      const contract = new ethers.Contract(
-        props.address,
-        TodoList.abi,
-        provider
-      );
+      const provider = await getProvider(connection);
+      const contract = await getContract(props.address, TodoList.abi, provider);
       const data = await contract.getData();
       const tasks = [];
 
@@ -33,12 +28,13 @@ const ListContents = (props) => {
         if (data[1][i] == true) continue;
         tasks.push({
           id: i,
-          contents: ethers.utils.parseBytes32String(data[0][i]),
+          contents: await parseBytes32String(data[0][i]),
           completed: data[1][i],
         });
       }
 
       setListData(tasks);
+      setLoading(false);
     };
     getData();
   }, [props]);
@@ -48,7 +44,7 @@ const ListContents = (props) => {
   };
 
   return (
-    <StyledCardItem type={"listContent"}>
+    <Card type={"listContent"}>
       <Header>
         <IconButton type={"icon"} onClick={route}>
           <Pencil2Icon width={20} height={20} />
@@ -61,9 +57,20 @@ const ListContents = (props) => {
               <p>{item.contents}</p>
             </li>
           ))}
-    </StyledCardItem>
+    </Card>
   );
 };
+
+const contentShow = keyframes({
+  "0%": { opacity: 0, transform: "translate(0%, -50%) scaleY(.96)" },
+  "100%": { opacity: 1, transform: "translate(0%, 0%) scaleY(1)" },
+});
+
+const Card = styled(StyledCardItem, {
+  "@media (prefers-reduced-motion: no-preference)": {
+    animation: `${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+  },
+})
 
 const Header = styled("div", {
   display: "flex",

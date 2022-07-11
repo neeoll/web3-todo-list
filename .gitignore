@@ -18,7 +18,9 @@
 # misc
 .DS_Store
 *.pem
-config.js
+
+# contracts
+/contracts
 
 # debug
 npm-debug.log*

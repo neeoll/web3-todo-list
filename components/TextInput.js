@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { styled } from "@stitches/react";
-import { slateDark } from "@radix-ui/colors";
+import { gray } from "@radix-ui/colors";
 
 const TextInput = ({ submit, maxLength, page, children }) => {
   const [formData, updateForm] = useState();
@@ -25,7 +25,7 @@ const TextInput = ({ submit, maxLength, page, children }) => {
 };
 
 const StyledTextInput = styled("input", {
-  backgroundColor: slateDark.slate2,
+  backgroundColor: gray.gray3,
   borderColor: "#393939",
   border: "none",
   borderRadius: 5,
@@ -35,13 +35,15 @@ const StyledTextInput = styled("input", {
   paddingBottom: 10,
   paddingLeft: 20,
   paddingRight: 20,
-  color: "#fff",
   variants: {
     page: {
       list: {
         width: "45%",
       },
     },
+  },
+  '&:focus': {
+    boxShadow: 'none'
   },
 });
 

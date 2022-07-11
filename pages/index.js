@@ -1,60 +1,42 @@
-import { useRouter } from "next/router";
-import Web3Modal from "web3modal";
-import { ethers } from "ethers";
-import { providerOptions } from "../providerOptions";
-import * as Dialog from "@radix-ui/react-dialog";
+import {useEffect} from "react";
+import {useRouter} from "next/router";
 import {
   StyledCard,
   StyledButton,
   StyledActions,
-  StyledText
-} from "../components/primitives/Primitives";
-import { StyledOverlay, StyledContent, IconButton } from '../components/primitives/Home'
-import DialogModal from "../components/DialogModal";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { useEffect } from 'react'
+  StyledText,
+} from "../components/Primitives";
+import Dialog from "../components/Dialog";
+import {connectToNetwork, getProvider} from "../utils";
+import { styled } from '@stitches/react'
 
 export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
     const checkConnected = async () => {
-      if (window.localStorage.getItem('userAddress') != null) {
-        console.log(window.localStorage.getItem('userAddress'))
-        console.log(window.localStorage.getItem('network'))
-        const web3modal = new Web3Modal({
-          cacheProvider: true,
-          providerOptions,
-        });
-        const library = await web3modal.connectTo(window.localStorage.getItem('network'));
-        const provider = new ethers.providers.Web3Provider(library);
+      if (window.localStorage.getItem("userAddress") != null) {
+        const connection = await connectToNetwork(
+          window.localStorage.getItem("network")
+        );
+        const provider = await getProvider(connection);
         const accounts = await provider.listAccounts();
 
         if (accounts) {
-          router.push(
-            {
-              pathname: "/lists",
-              query: { address: accounts[0] },
-            },
-            "/lists"
-          );
+          router.push("/lists");
         }
       } else {
-        return
+        return;
       }
-    }
+    };
 
-    checkConnected()
-  }, [])
+    checkConnected();
+  }, []);
 
   const connectWalletHandler = async (_network) => {
     try {
-      const web3modal = new Web3Modal({
-        cacheProvider: true,
-        providerOptions,
-      });
-      const library = await web3modal.connectTo(_network);
-      const provider = new ethers.providers.Web3Provider(library);
+      const connection = await connectToNetwork(_network);
+      const provider = await getProvider(connection);
       const accounts = await provider.listAccounts();
 
       if (accounts) {
@@ -63,7 +45,7 @@ export default function Home() {
         router.push(
           {
             pathname: "/lists",
-            query: { address: accounts[0] },
+            query: {address: accounts[0]},
           },
           "/lists"
         );
@@ -73,40 +55,32 @@ export default function Home() {
     }
   };
 
-  return (
-    <StyledCard page={"connect"}>
-      <StyledActions className={"header"}>
-        <Dialog.Root>
-          <Dialog.Trigger asChild>
-            <StyledButton type={"save"}>Connect Wallet</StyledButton>
-          </Dialog.Trigger>
-          <Dialog.Portal>
-            <StyledOverlay>
-              <StyledContent>
-                <DialogModal select={connectWalletHandler} />
-                <Dialog.Close asChild>
-                  <StyledActions>
-                    <IconButton type={"icon"}>
-                      <Cross2Icon height={20} width={20} />
-                    </IconButton>
-                  </StyledActions>
-                </Dialog.Close>
-              </StyledContent>
-            </StyledOverlay>
-          </Dialog.Portal>
-        </Dialog.Root>
-        <StyledButton
-          type={"save"}
-          onClick={() => {
-            router.push("https://github.com/neeoll/web3-todo-list");
-          }}
-        >
-          Repository
-        </StyledButton>
-      </StyledActions>
-      <StyledText className={"contents"}>
-        *Switch to Goerli Testnet before proceeding*
-      </StyledText>
-    </StyledCard>
+  return( 
+    <>
+      <Title>{"Tudu"}</Title>
+      <StyledCard page={"connect"}>
+        <StyledActions className={"header"}>
+          <Dialog onSelect={connectWalletHandler} />
+          <StyledButton
+            type={"save"}
+            onClick={() => {
+              router.push("https://github.com/neeoll/web3-todo-list");
+            }}>
+            Repository
+          </StyledButton>
+        </StyledActions>
+        <StyledText className={"contents"}>
+          *Switch to Goerli Testnet before proceeding*
+        </StyledText>
+      </StyledCard>
+    </>
   );
 }
+
+const Title = styled('div', {
+  display: 'flex',
+  color: '#fff',
+  textAlign: 'center',
+  fontSize: 36,
+  fontFamily: `'PT Sans Narrow', sans-serif`
+})
