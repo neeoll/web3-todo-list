@@ -1,4 +1,5 @@
-import { providerOptions } from "./providerOptions";
+import {providerOptions} from "./providerOptions";
+import TodoList from "./artifacts/contracts/TodoList.sol/TodoList.json"
 
 export const connectToNetwork = async (network) => {
   const Web3Modal = (await import("web3modal")).default;
@@ -7,39 +8,49 @@ export const connectToNetwork = async (network) => {
     cacheProvider: true,
     providerOptions,
   });
-
+  
   return await web3modal.connectTo(network);
 };
 
-export const getProvider = async(connection) => {
+export const getProvider = async (connection) => {
   const ethers = await import("ethers");
-  return new ethers.providers.Web3Provider(connection)
-}
+  return new ethers.providers.Web3Provider(connection);
+};
 
-export const getContract = async(address, abi, provider_signer) => {
+export const deploy = async (provider, title, owner, isPrivate) => {
   const ethers = await import("ethers");
-  return new ethers.Contract(address, abi, provider_signer)
-}
+  
+  const signer = provider.getSigner()
+  const contract = new ethers.ContractFactory(TodoList.abi, TodoList.bytecode, signer)
+  const deployedContract = await contract.deploy(title, owner, isPrivate);
 
-export const parseBytes32String = async(bytes32) => {
-  const ethers = await import("ethers");
-  return ethers.utils.parseBytes32String(bytes32)
-}
+  return deployedContract
+};
 
-export const formatBytes32String = async(string) => {
+export const getContract = async (address, abi, provider_signer) => {
   const ethers = await import("ethers");
-  return ethers.utils.formatBytes32String(string)
-}
+  return new ethers.Contract(address, abi, provider_signer);
+};
 
-export const formatUnits = async(value, format) => {
+export const parseBytes32String = async (bytes32) => {
   const ethers = await import("ethers");
-  return ethers.utils.formatUnits(value, format)
-}
+  return ethers.utils.parseBytes32String(bytes32);
+};
+
+export const formatBytes32String = async (string) => {
+  const ethers = await import("ethers");
+  return ethers.utils.formatBytes32String(string);
+};
+
+export const formatUnits = async (value, format) => {
+  const ethers = await import("ethers");
+  return ethers.utils.formatUnits(value, format);
+};
 
 export const generateHsl = () => {
-  const hue = Math.round(Math.random() * 255)
-  const saturation = Math.round((Math.random() * (1 - 0.5) + 0.5) * 100)
-  const lightness = Math.round((Math.random() * (0.7 - 0.25) + 0.25) * 100)
+  const hue = Math.round(Math.random() * 255);
+  const saturation = Math.round((Math.random() * (1 - 0.5) + 0.5) * 100);
+  const lightness = Math.round((Math.random() * (0.7 - 0.25) + 0.25) * 100);
 
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`
-}
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};

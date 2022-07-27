@@ -2,12 +2,12 @@ const hre = require("hardhat")
 const fs = require('fs')
 
 async function main() {
-  const Main = await hre.ethers.getContractFactory("Main")
-  const main = await Main.deploy()
+  const TodoList = await hre.ethers.getContractFactory("TodoList")
+  const todoList = await TodoList.deploy("title", "", false)
 
-  await main.deployed();
+  await todoList.deployed();
 
-  console.log("Main deployed to:", main.address);
+  console.log("TodoList deployed to:", todoList.address);
   fs.writeFileSync('./config.js', `export const contractAddress = "${main.address}"`)
 }
 

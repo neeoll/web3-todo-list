@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import TodoList from "../artifacts/contracts/TodoList.sol/TodoList.json";
 import { StyledCardItem, StyledText } from "./Primitives";
 import { LockClosedIcon } from "@radix-ui/react-icons";
-import { connectToNetwork, getProvider, getContract, parseBytes32String } from '../utils'
+import * as Utils from "../utils"
 
 const List = (props) => {
   const [listTitle, setTitle] = useState();
@@ -10,16 +10,16 @@ const List = (props) => {
 
   useEffect(() => {
     const getData = async () => {
-      const connection = await connectToNetwork(
+      const connection = await Utils.connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = await getProvider(connection)
-      const contract = await getContract(
+      const provider = await Utils.getProvider(connection)
+      const contract = await Utils.getContract(
         props.address,
         TodoList.abi,
         provider
       );
-      const title = await parseBytes32String(await contract.getTitle());
+      const title = await Utils.parseBytes32String(await contract.getTitle());
       const isPrivate = await contract.getPrivacyStatus();
 
       setTitle(title);

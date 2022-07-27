@@ -3,24 +3,20 @@ import TodoList from "../artifacts/contracts/TodoList.sol/TodoList.json";
 import {StyledButton, StyledCardItem} from "./Primitives";
 import {Pencil2Icon} from "@radix-ui/react-icons";
 import {styled, keyframes} from "@stitches/react";
-import {
-  connectToNetwork,
-  getProvider,
-  getContract,
-  parseBytes32String,
-} from "../utils";
+import * as Utils from "../utils"
 
 const ListContents = (props) => {
   const [listData, setListData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("")
 
   useEffect(() => {
     const getData = async () => {
-      const connection = await connectToNetwork(
+      const connection = await Utils.connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = await getProvider(connection);
-      const contract = await getContract(props.address, TodoList.abi, provider);
+      const provider = await Utils.getProvider(connection);
+      const contract = await Utils.getContract(props.address, TodoList.abi, provider);
+      const title = await Utils.parseBytes32String( await contract.getTitle() )
       const data = await contract.getData();
       const tasks = [];
 
@@ -28,13 +24,13 @@ const ListContents = (props) => {
         if (data[1][i] == true) continue;
         tasks.push({
           id: i,
-          contents: await parseBytes32String(data[0][i]),
+          contents: await Utils.parseBytes32String(data[0][i]),
           completed: data[1][i],
         });
       }
 
       setListData(tasks);
-      setLoading(false);
+      setTitle(title)
     };
     getData();
   }, [props]);
@@ -46,6 +42,7 @@ const ListContents = (props) => {
   return (
     <Card type={"listContent"}>
       <Header>
+        {title}
         <IconButton type={"icon"} onClick={route}>
           <Pencil2Icon width={20} height={20} />
         </IconButton>

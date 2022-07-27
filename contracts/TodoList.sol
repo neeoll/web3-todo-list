@@ -8,8 +8,7 @@ contract TodoList {
     event ChangesSaved();
     event WriteAccessModified(address addr);
     event ReadAccessModified(address addr);
-
-    uint index;
+    
     uint taskCount;
     bytes32 title;
     address owner;
@@ -24,8 +23,7 @@ contract TodoList {
     mapping(address => bool) readAccess;
     mapping(uint => Task) tasks;
 
-    constructor(bytes32 _title, address _owner, uint _index, bool _isPrivate) {
-        index = _index;
+    constructor(bytes32 _title, address _owner, bool _isPrivate) {
         owner = _owner;
         title = _title;
         isPrivate = _isPrivate;
@@ -91,7 +89,6 @@ contract TodoList {
         return(_contents, _statuses); 
     }
 
-    function getIndex() public view returns(uint) { return index; }
     function getTaskCount() public view returns(uint) { return taskCount; }
     function getTitle() public view returns(bytes32) { return title; }
     function getWriteStatus() public view returns(bool) { return writeAccess[msg.sender]; }

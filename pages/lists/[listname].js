@@ -6,30 +6,21 @@ import {
   StyledButton,
   StyledDiv,
   StyledText,
-  LoadingPlaceholder,
 } from "../../components/Primitives";
-import {contractAddress} from "../../config";
-import Main from "../../artifacts/contracts/Main.sol/Main.json";
 import TodoList from "../../artifacts/contracts/TodoList.sol/TodoList.json";
 import TextInput from "../../components/TextInput";
 import Tooltip from "../../components/Tooltip";
 import Tabs from "../../components/Tabs";
-import {
-  connectToNetwork,
-  getProvider,
-  getContract,
-  parseBytes32String,
-  formatBytes32String,
-  formatUnits,
-} from "../../utils";
 import Loading from "../../components/Loading";
-import { keyframes, styled } from "@stitches/react";
+import {keyframes, styled} from "@stitches/react";
+import * as Realm from "realm-web";
+import * as Utils from "../../utils"
 
 export default function Todo() {
   const [tasks, updateTasks] = useState([]);
   const [permissions, updatePermissions] = useState({});
   const [changesMade, toggleChangesMade] = useState(false);
-  const [costEstimate, updateEstimate] = useState();
+  const [costEstimate, updateEstimate] = useState({});
   const [listSaved, setSaved] = useState();
   const [loading, setLoading] = useState(true);
   const [processingTransaction, setProcessing] = useState(false);
@@ -40,11 +31,12 @@ export default function Todo() {
 
   useEffect(() => {
     const initialContractLoad = async () => {
-      const connection = await connectToNetwork(
+
+      const connection = await Utils.connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = await getProvider(connection);
-      const listContract = await getContract(
+      const provider = await Utils.getProvider(connection);
+      const listContract = await Utils.getContract(
         window.localStorage.getItem("contractAddress"),
         TodoList.abi,
         provider
@@ -55,7 +47,7 @@ export default function Todo() {
       for (let i = 0; i < contractData[0].length; i++) {
         _tasks.push({
           id: i,
-          content: await parseBytes32String(contractData[0][i]),
+          content: await Utils.parseBytes32String(contractData[0][i]),
           completed: contractData[1][i],
           new: false,
           changed: false,
@@ -72,22 +64,24 @@ export default function Todo() {
       });
       updatePermissions({writeAccess: hasAccess, ownerStatus: isOwner});
 
-      const mainContract = await getContract(
-        contractAddress,
-        Main.abi,
-        provider
-      );
-      const saved = await mainContract.hasListSaved(
-        window.localStorage.getItem("contractAddress"),
-        {
-          from: window.localStorage.getItem("userAddress"),
-        }
-      );
+      const app = new Realm.App({id: "application-0-heuqo"});
+      const credentials = Realm.Credentials.anonymous();
+      const logIn = await app.logIn(credentials);
 
+      const client = app.currentUser.mongoClient("mongodb-atlas");
+      const collection = client
+        .db(window.localStorage.getItem("network"))
+        .collection("users");
+      const contracts = (
+        await collection.findOne({
+          address: window.localStorage.getItem("userAddress"),
+        })
+      ).contracts;
+      
       setListAddress(window.localStorage.getItem("contractAddress"));
       setNetwork(window.localStorage.getItem("network"));
       setUserAddress(window.localStorage.getItem("userAddress"));
-      setSaved(saved);
+      setSaved(contracts.includes(window.localStorage.getItem("contractAddress")));
       setLoading(false);
     };
     initialContractLoad();
@@ -95,18 +89,49 @@ export default function Todo() {
 
   useEffect(() => {
     const estimateGas = async () => {
-      const connection = await connectToNetwork(
+      const connection = await Utils.connectToNetwork(
         window.localStorage.getItem("network")
       );
-      const provider = await getProvider(connection);
-      const feeData = await provider.getFeeData();
-      const costEstimate = feeData.maxFeePerGas * 204838;
-      const cost = await formatUnits(costEstimate, "ether");
+      const provider = await Utils.getProvider(connection);
+      const signer = provider.getSigner();
 
-      updateEstimate(cost);
+      const changedIds = [];
+      const changedContents = [];
+      const changedStatuses = [];
+
+      tasks.forEach((item) => {
+        if (item.changed == true) {
+          changedIds.push(item.id);
+          changedContents.push(Utils.formatBytes32String(item.content));
+          changedStatuses.push(item.completed);
+        }
+      });
+
+      const gasPrice = await Utils.formatUnits(await provider.getGasPrice(), "ether");
+      const gasUnits = parseInt(
+        (
+          await (
+            await Utils.getContract(
+              window.localStorage.getItem("contractAddress"),
+              TodoList.abi,
+              signer
+            )
+          ).estimateGas.saveChanges(
+            changedIds,
+            changedContents,
+            changedStatuses
+          )
+        )._hex,
+        16
+      );
+
+      const transactionCostETH = parseFloat(gasPrice) * gasUnits;
+      const ETHValue = 1240.23; // Update later
+      const transactionCostUSD = transactionCostETH * ETHValue;
+      updateEstimate({eth: transactionCostETH, usd: transactionCostUSD});
     };
     estimateGas();
-  }, []);
+  }, [tasks]);
 
   const checkChanges = (list) => {
     for (let i = 0; i < list.length; i++) {
@@ -135,18 +160,15 @@ export default function Todo() {
 
   const modifyWriteAccess = async (e, address) => {
     if (typeof window.ethereum == "undefined") return;
-    try {
-      const connection = await connectToNetwork(
-        window.localStorage.getItem("network")
-      );
-      const signer = (await getProvider(connection)).getSigner();
-      const contract = await getContract(listAddress, TodoList.abi, signer);
-      await contract.grantWriteAccess(address, {
-        from: userAddress,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+
+    const connection = await Utils.connectToNetwork(
+      window.localStorage.getItem("network")
+    );
+    const signer = (await Utils.getProvider(connection)).getSigner();
+    const contract = await Utils.getContract(listAddress, TodoList.abi, signer);
+    await contract.grantWriteAccess(address, {
+      from: userAddress,
+    });
   };
 
   const saveChanges = async () => {
@@ -157,16 +179,16 @@ export default function Todo() {
     tasks.forEach((item) => {
       if (item.changed == true) {
         changedIds.push(item.id);
-        changedContents.push(formatBytes32String(item.content));
+        changedContents.push(Utils.formatBytes32String(item.content));
         changedStatuses.push(item.completed);
       }
     });
 
-    const connection = await connectToNetwork(
+    const connection = await Utils.connectToNetwork(
       window.localStorage.getItem("network")
     );
-    const signer = (await getProvider(connection)).getSigner();
-    const contract = await getContract(listAddress, TodoList.abi, signer);
+    const signer = (await Utils.getProvider(connection)).getSigner();
+    const contract = await Utils.getContract(listAddress, TodoList.abi, signer);
     await contract.saveChanges(changedIds, changedContents, changedStatuses, {
       from: userAddress,
     });
@@ -212,21 +234,22 @@ export default function Todo() {
   };
 
   const addList = async () => {
-    const connection = await connectToNetwork(
-      window.localStorage.getItem("network")
-    );
-    const signer = (await getProvider(connection)).getSigner();
-    const contract = new ethers.Contract(contractAddress, Main.abi, signer);
-    await contract.addList(listAddress, {
-      from: userAddress,
-    });
+    const app = new Realm.App({id: "application-0-heuqo"});
+    const credentials = Realm.Credentials.anonymous();
+    const logIn = await app.logIn(credentials);
 
-    setProcessing(true);
-
-    contract.once("Add", async (event) => {
-      setProcessing(false);
-      window.location.reload();
-    });
+    const client = app.currentUser.mongoClient("mongodb-atlas");
+    const collection = client
+      .db(window.localStorage.getItem("network"))
+      .collection("users");
+    const query = {address: window.localStorage.getItem("userAddress")};
+    const updateDoc = {
+      $push: {
+        contracts: window.localStorage.getItem("contractAddress"),
+      },
+    };
+    const result = await collection.updateOne(query, updateDoc);
+    window.location.reload()
   };
 
   const toggle = (taskId, completed) => {
@@ -246,11 +269,9 @@ export default function Todo() {
 
   return (
     <StyledCard_List loading={loading} writeAccess={permissions.writeAccess}>
-      {processingTransaction == true && (
-        <Loading />
-      )}
+      {processingTransaction == true && <Loading fullscreen={true} />}
       <StyledForm className={"form"}>
-        <TextInput submit={addTask} maxLength={32} page={"list"}>
+        <TextInput submit={addTask} maxLength={31} page={"list"}>
           New Task
         </TextInput>
         {permissions.ownerStatus == true && (
@@ -278,7 +299,7 @@ export default function Todo() {
         )
       ) : (
         <StyledDiv className={"loading"}>
-          <LoadingPlaceholder />
+          <Loading fullscreen={false} />
         </StyledDiv>
       )}
       {changesMade == true && (
@@ -300,19 +321,22 @@ export default function Todo() {
       )}
       <StyledText className={"footer"}>
         <p className="address">Address: {listAddress}</p>
-        <p className="address">Max Transaction Fee: {costEstimate} Ether</p>
+        <p className="address">
+          Approximate Transaction Fee: {Number(costEstimate.eth).toFixed(6)} ETH /{" "}
+          {Number(costEstimate.usd).toFixed(2)} USD
+        </p>
       </StyledText>
     </StyledCard_List>
   );
 }
 
 const contentShow = keyframes({
-  "0%": { opacity: 0, transform: "translate(0%, -50%) scaleY(.96)" },
-  "100%": { opacity: 1, transform: "translate(0%, 0%) scaleY(1)" },
+  "0%": {opacity: 0, transform: "translate(0%, -50%) scaleY(.96)"},
+  "100%": {opacity: 1, transform: "translate(0%, 0%) scaleY(1)"},
 });
 
 const Actions = styled(StyledActions, {
   "@media (prefers-reduced-motion: no-preference)": {
     animation: `${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
   },
-})
+});

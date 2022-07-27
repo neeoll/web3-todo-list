@@ -2,10 +2,10 @@ import * as Switch from "@radix-ui/react-switch";
 import { styled } from "@stitches/react";
 import { blackA, gray } from "@radix-ui/colors";
 
-const Toggle = ({ toggle }) => {
+const Toggle = ({ toggle, label }) => {
   return (
     <Flex>
-      <label>Private</label>
+      <label>{label}</label>
       <StyledSwitch onCheckedChange={toggle}>
         <StyledThumb defaultChecked="false" />
       </StyledSwitch>

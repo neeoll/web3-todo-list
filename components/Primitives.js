@@ -11,6 +11,7 @@ export const StyledDiv = styled("div", {
         display: "flex",
         flexDirection: "column",
         gridArea: "footer",
+        gap: 10,
         alignItems: "center",
       },
       lists: {
@@ -246,7 +247,8 @@ export const StyledButton = styled("button", {
       icon: {
         backgroundColor: "transparent",
         color: "#000",
-        paddingLeft: 0,
+        padding: 0,
+        display: 'flex',
       },
     },
     ignoreBlock: {
@@ -260,14 +262,4 @@ export const StyledButton = styled("button", {
 export const StyledText = styled(StyledDiv, {
   display: "flex",
   justifyContent: "space-evenly",
-});
-
-export const LoadingPlaceholder = styled('div', {
-  width: '100%',
-  height: '100%',
-  position: 'fixed',
-  background: `
-      url("https://media.giphy.com/media/8agqybiK5LW8qrG3vJ/giphy.gif") center
-      no-repeat`,
-  zIndex: 1,
 });
